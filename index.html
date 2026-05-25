@@ -1,0 +1,3187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HXZE STUDIO — Design Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100;0,200;0,300;0,400;0,700;0,900;1,100;1,300&family=JetBrains+Mono:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ════════════════════════════════════════
+   DESIGN TOKENS
+════════════════════════════════════════ */
+:root {
+  --void:    #020408;
+  --abyss:   #050810;
+  --deep:    #080d1a;
+  --layer1:  #0c1224;
+  --layer2:  #111930;
+  --layer3:  #18243e;
+  --surface: rgba(12,18,36,0.8);
+
+  --neon-g:  #00ff88;  /* green neon - graphic design */
+  --neon-b:  #00b4ff;  /* blue neon  - web/tech */
+  --neon-p:  #bf00ff;  /* purple     - clothing */
+  --neon-o:  #ff6a00;  /* orange     - network */
+  --neon-w:  #ffffff;  /* white      - general */
+
+  --g-glow:  rgba(0,255,136,0.2);
+  --b-glow:  rgba(0,180,255,0.2);
+  --p-glow:  rgba(191,0,255,0.2);
+  --o-glow:  rgba(255,106,0,0.2);
+
+  --glass:       rgba(8,13,26,0.7);
+  --glass-lt:    rgba(255,255,255,0.03);
+  --glass-md:    rgba(255,255,255,0.055);
+  --glass-hv:    rgba(255,255,255,0.09);
+  --glass-str:   rgba(255,255,255,0.13);
+  --edge:        rgba(255,255,255,0.06);
+  --edge2:       rgba(255,255,255,0.11);
+  --edge3:       rgba(255,255,255,0.18);
+
+  --blur-xs: blur(8px) saturate(1.3);
+  --blur-sm: blur(16px) saturate(1.4);
+  --blur-md: blur(28px) saturate(1.5);
+  --blur-lg: blur(48px) saturate(1.6);
+
+  --text:    #dce8ff;
+  --text-m:  rgba(220,232,255,0.5);
+  --text-d:  rgba(220,232,255,0.25);
+  --text-g:  rgba(220,232,255,0.1);
+
+  --mono:   'JetBrains Mono', monospace;
+  --sans:   'Exo 2', sans-serif;
+
+  --r-xs: 6px;
+  --r-sm: 12px;
+  --r-md: 20px;
+  --r-lg: 28px;
+  --r-xl: 40px;
+  --r-pill: 9999px;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:var(--sans);
+  background:var(--void);
+  color:var(--text);
+  overflow-x:hidden;
+  cursor:none;
+}
+
+::selection { background:var(--neon-b); color:var(--void); }
+::-webkit-scrollbar { width:2px; }
+::-webkit-scrollbar-track { background:var(--abyss); }
+::-webkit-scrollbar-thumb { background:var(--neon-b); }
+
+/* ════════════ CURSOR ════════════ */
+#C { position:fixed; z-index:99999; pointer-events:none; transform:translate(-50%,-50%);
+  width:10px; height:10px; background:var(--neon-b); border-radius:50%;
+  transition:width .2s, height .2s, background .2s; mix-blend-mode:screen; }
+#CR { position:fixed; z-index:99998; pointer-events:none; transform:translate(-50%,-50%);
+  width:34px; height:34px; border:1px solid rgba(0,180,255,0.45); border-radius:50%;
+  transition:left .1s ease, top .1s ease, width .3s, height .3s, border-color .3s; }
+#C.x { width:0; height:0; }
+#CR.x { width:52px; height:52px; border-color:var(--neon-b); }
+
+/* ════════════ BG FIELD ════════════ */
+.bg {
+  position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+  background: linear-gradient(170deg, #020408 0%, #050912 40%, #04060e 100%);
+}
+.bg::before {
+  content:'';
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 0% 30%, rgba(0,180,255,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 60% at 100% 70%, rgba(191,0,255,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 40% at 50% 100%, rgba(0,255,136,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse 30% 30% at 80% 10%, rgba(255,106,0,0.05) 0%, transparent 45%);
+}
+
+/* Animated grid */
+.bg-grid {
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(0,180,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,180,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridDrift 30s linear infinite;
+}
+@keyframes gridDrift { from{background-position:0 0} to{background-position:60px 60px} }
+
+/* Floating orbs */
+.orb { position:fixed; border-radius:50%; filter:blur(100px); pointer-events:none; will-change:transform; z-index:0; }
+.orb1 { width:min(800px,80vw); height:min(800px,80vw); background:radial-gradient(circle,rgba(0,160,255,0.1) 0%,transparent 70%); top:-20%; left:-15%; animation:orb1 28s ease-in-out infinite alternate; }
+.orb2 { width:min(600px,60vw); height:min(600px,60vw); background:radial-gradient(circle,rgba(191,0,255,0.1) 0%,transparent 70%); bottom:-10%; right:-10%; animation:orb2 22s ease-in-out infinite alternate; }
+.orb3 { width:min(500px,50vw); height:min(500px,50vw); background:radial-gradient(circle,rgba(0,255,136,0.07) 0%,transparent 70%); top:40%; left:30%; animation:orb3 35s ease-in-out infinite alternate; }
+@keyframes orb1 { to{transform:translate(80px,60px) scale(1.15)} }
+@keyframes orb2 { to{transform:translate(-60px,40px) scale(1.1)} }
+@keyframes orb3 { to{transform:translate(40px,-80px) scale(0.9)} }
+
+/* Scanline */
+.scanline {
+  position:fixed; inset:0; z-index:1; pointer-events:none;
+  background:repeating-linear-gradient(
+    0deg, transparent 0px, transparent 3px,
+    rgba(0,180,255,0.008) 3px, rgba(0,180,255,0.008) 4px
+  );
+}
+
+/* Grain */
+.grain {
+  position:fixed; inset:-100px; z-index:1; pointer-events:none; opacity:0.022;
+  width:calc(100%+200px); height:calc(100%+200px);
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grn .4s steps(2) infinite;
+}
+@keyframes grn { 0%{transform:translate(0,0)} 50%{transform:translate(2%,-1%)} 100%{transform:translate(-1%,2%)} }
+
+/* ════════════ REVEAL SYSTEM ════════════ */
+.rv { opacity:0; transform:translateY(28px); transition:opacity .75s cubic-bezier(.25,.46,.45,.94), transform .75s cubic-bezier(.25,.46,.45,.94); }
+.rv.in { opacity:1; transform:translateY(0); }
+.rv-l { opacity:0; transform:translateX(-28px); transition:opacity .75s cubic-bezier(.25,.46,.45,.94), transform .75s cubic-bezier(.25,.46,.45,.94); }
+.rv-l.in { opacity:1; transform:translateX(0); }
+.rv-r { opacity:0; transform:translateX(28px); transition:opacity .75s cubic-bezier(.25,.46,.45,.94), transform .75s cubic-bezier(.25,.46,.45,.94); }
+.rv-r.in { opacity:1; transform:translateX(0); }
+
+/* ════════════ UTILITY ════════════ */
+.mono { font-family:var(--mono); }
+.neon-g { color:var(--neon-g); }
+.neon-b { color:var(--neon-b); }
+.neon-p { color:var(--neon-p); }
+.neon-o { color:var(--neon-o); }
+
+/* ════════════════════════════════════════
+   GLASS PANEL BASE
+════════════════════════════════════════ */
+.panel {
+  background:var(--glass);
+  backdrop-filter:var(--blur-md);
+  -webkit-backdrop-filter:var(--blur-md);
+  border:1px solid var(--edge2);
+  border-radius:var(--r-md);
+  box-shadow: 0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+  position:relative; overflow:hidden;
+}
+.panel::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%);
+}
+
+.panel-lift {
+  transition: transform .4s cubic-bezier(.25,.46,.45,.94),
+              box-shadow .4s cubic-bezier(.25,.46,.45,.94),
+              border-color .4s;
+  cursor:none;
+}
+.panel-lift:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.09);
+}
+
+/* Skill badges */
+.skill-badge {
+  padding:12px;
+  border-radius:var(--r-sm);
+  border:1px solid var(--edge2);
+  text-align:center;
+  font-weight:600;
+  font-size:.72rem;
+  font-family:var(--mono);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  transition:all .3s;
+  cursor:none;
+}
+.skill-badge:hover {
+  transform:translateY(-4px);
+  box-shadow:0 0 20px rgba(0,180,255,0.2);
+}
+
+/* Portfolio tab buttons */
+.portfolio-tab-btn {
+  padding:9px 22px;
+  border-radius:var(--r-pill);
+  border:1px solid var(--edge2);
+  background:transparent;
+  color:var(--text-m);
+  font-weight:600;
+  font-size:.65rem;
+  font-family:var(--mono);
+  letter-spacing:.12em;
+  cursor:none;
+  transition:all .3s;
+  text-transform:uppercase;
+}
+.portfolio-tab-btn:hover {
+  border-color:var(--neon-pk);
+  color:var(--neon-pk);
+}
+.portfolio-tab-btn.active {
+  background:linear-gradient(135deg,var(--neon-pk),var(--neon-p));
+  color:var(--void);
+  border-color:transparent;
+  box-shadow:0 0 20px rgba(255,45,120,0.3);
+}
+
+/* Portfolio items */
+.portfolio-item {
+  overflow:hidden;
+  width:100%;
+}
+.portfolio-item img {
+  width:100%;
+  height:auto;
+  object-fit:cover;
+  display:block;
+}
+.portfolio-item:hover {
+  transform:translateY(-6px);
+  border-color:var(--neon-pk);
+  box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 30px rgba(255,45,120,0.15);
+}
+.portfolio-item:hover img {
+  transform:scale(1.04);
+}
+.portfolio-item:hover > div {
+  opacity:1;
+}
+.portfolio-grid {
+  position:relative;
+}
+.portfolio-footer {
+  display:flex;
+  justify-content:center;
+  margin-top:24px;
+}
+.portfolio-toggle-btn {
+  min-width:180px;
+}
+.poster-strip-shell {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  overflow:hidden;
+  width:100%;
+}
+.poster-strip {
+  display:flex;
+  gap:12px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  padding-bottom:10px;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+}
+.poster-strip::-webkit-scrollbar {
+  height:8px;
+}
+.poster-strip-item {
+  flex:0 0 min(280px,24vw);
+  width:min(280px,24vw);
+  aspect-ratio:.75;
+  border-radius:var(--r-md);
+  overflow:hidden;
+  position:relative;
+  scroll-snap-align:start;
+}
+.poster-strip-item img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.poster-scroll-btn {
+  border:none;
+  background:rgba(255,255,255,0.08);
+  color:var(--text);
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:none;
+  transition:background .25s, transform .2s;
+}
+.poster-scroll-btn:hover {
+  background:rgba(255,255,255,0.16);
+  transform:scale(1.05);
+}
+
+/* Neon border variants */
+.border-g { border-color:rgba(0,255,136,0.2); }
+.border-g:hover { border-color:rgba(0,255,136,0.4); box-shadow:0 24px 80px rgba(0,0,0,0.7), 0 0 40px rgba(0,255,136,0.12); }
+.border-b { border-color:rgba(0,180,255,0.2); }
+.border-b:hover { border-color:rgba(0,180,255,0.4); box-shadow:0 24px 80px rgba(0,0,0,0.7), 0 0 40px rgba(0,180,255,0.12); }
+.border-p { border-color:rgba(191,0,255,0.2); }
+.border-p:hover { border-color:rgba(191,0,255,0.4); box-shadow:0 24px 80px rgba(0,0,0,0.7), 0 0 40px rgba(191,0,255,0.12); }
+.border-o { border-color:rgba(255,106,0,0.2); }
+.border-o:hover { border-color:rgba(255,106,0,0.4); box-shadow:0 24px 80px rgba(0,0,0,0.7), 0 0 40px rgba(255,106,0,0.12); }
+
+/* ════════════════════════════════════════
+   NAV
+════════════════════════════════════════ */
+.nav {
+  position:fixed; top:0; left:0; right:0; z-index:400;
+  height:60px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 clamp(18px,4%,60px);
+  transition:background .4s, box-shadow .4s;
+}
+.nav.on {
+  background:rgba(2,4,8,0.9);
+  backdrop-filter:var(--blur-md);
+  -webkit-backdrop-filter:var(--blur-md);
+  box-shadow:0 1px 0 var(--edge2);
+}
+
+.nav-logo {
+  font-family:var(--sans); font-weight:900; font-size:1.2rem;
+  letter-spacing:.12em; color:var(--text); text-decoration:none;
+  display:flex; align-items:center; gap:8px;
+}
+.logo-icon {
+  width:28px; height:28px; border-radius:6px;
+  background:linear-gradient(135deg,var(--neon-b),var(--neon-p));
+  display:flex; align-items:center; justify-content:center;
+  font-size:.7rem; font-weight:900; color:var(--void);
+  box-shadow:0 0 16px rgba(0,180,255,0.4);
+  animation:logoPulse 3s ease-in-out infinite;
+}
+@keyframes logoPulse {
+  0%,100%{box-shadow:0 0 16px rgba(0,180,255,0.4)}
+  50%{box-shadow:0 0 28px rgba(0,180,255,0.7), 0 0 50px rgba(191,0,255,0.3)}
+}
+
+.nav-links { display:flex; gap:clamp(16px,2.5vw,40px); list-style:none; position:absolute; left:50%; transform:translateX(-50%); }
+.nav-links a {
+  font-size:.65rem; font-weight:400; letter-spacing:.25em; text-transform:uppercase;
+  color:var(--text-m); text-decoration:none; transition:color .2s;
+  font-family:var(--mono); position:relative;
+}
+.nav-links a:hover { color:var(--neon-b); }
+.nav-links a::after { content:''; position:absolute; bottom:-3px; left:0; right:0; height:1px; background:var(--neon-b); transform:scaleX(0); transform-origin:left; transition:transform .3s; }
+.nav-links a:hover::after { transform:scaleX(1); }
+
+.nav-r { display:flex; align-items:center; gap:12px; }
+.nav-btn {
+  font-family:var(--mono); font-size:.62rem; font-weight:400;
+  letter-spacing:.2em; text-transform:uppercase;
+  border-radius:var(--r-pill); padding:8px 20px;
+  text-decoration:none; transition:all .25s; cursor:none;
+}
+.nav-btn-ghost { border:1px solid var(--edge3); color:var(--text-m); background:transparent; }
+.nav-btn-ghost:hover { border-color:var(--neon-b); color:var(--neon-b); box-shadow:0 0 20px rgba(0,180,255,0.2); }
+.nav-btn-solid { background:var(--neon-b); color:var(--void); border:none; font-weight:500; }
+.nav-btn-solid:hover { box-shadow:0 0 30px rgba(0,180,255,0.5); transform:scale(1.04); }
+
+.hbg { display:none; flex-direction:column; gap:5px; cursor:none; padding:4px; }
+.hbg span { display:block; width:22px; height:1.5px; background:var(--text-m); transition:transform .3s, opacity .3s; }
+.hbg.o span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
+.hbg.o span:nth-child(2) { opacity:0; }
+.hbg.o span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
+
+.mob-nav {
+  display:none; position:fixed; top:60px; left:0; right:0; bottom:0; z-index:399;
+  flex-direction:column; align-items:center; justify-content:center; gap:28px;
+  background:rgba(2,4,8,0.97); backdrop-filter:var(--blur-lg);
+  opacity:0; pointer-events:none; transition:opacity .3s;
+}
+.mob-nav.o { opacity:1; pointer-events:all; }
+.mob-nav a { font-family:var(--sans); font-size:clamp(1.8rem,5vw,2.5rem); font-weight:700; color:var(--text); text-decoration:none; transition:color .2s; }
+.mob-nav a:hover { color:var(--neon-b); }
+
+/* ════════════════════════════════════════
+   SECTION WRAPPER
+════════════════════════════════════════ */
+.sec {
+  position:relative; z-index:10;
+  padding:clamp(80px,10vw,140px) clamp(18px,5%,80px);
+}
+
+.sec-tag {
+  display:inline-flex; align-items:center; gap:10px;
+  font-family:var(--mono); font-size:.58rem; font-weight:400;
+  letter-spacing:.4em; text-transform:uppercase; color:var(--text-d);
+  margin-bottom:16px;
+}
+.sec-tag::before { content:''; display:block; width:20px; height:1px; }
+.sec-tag.tg { color:var(--neon-g); }
+.sec-tag.tg::before { background:var(--neon-g); }
+.sec-tag.tb { color:var(--neon-b); }
+.sec-tag.tb::before { background:var(--neon-b); }
+.sec-tag.tp { color:var(--neon-p); }
+.sec-tag.tp::before { background:var(--neon-p); }
+.sec-tag.to { color:var(--neon-o); }
+.sec-tag.to::before { background:var(--neon-o); }
+
+.sec-h {
+  font-family:var(--sans); font-weight:900;
+  font-size:clamp(30px,5vw,64px);
+  line-height:1.0; letter-spacing:-.01em; color:var(--text);
+  margin-bottom:14px;
+}
+.sec-sub {
+  font-size:clamp(.75rem,1.1vw,.88rem); font-weight:200;
+  letter-spacing:.06em; line-height:1.9; color:var(--text-m);
+  max-width:480px;
+}
+
+/* ════════════════════════════════════════
+   ██ 01 — HERO / LANDING
+════════════════════════════════════════ */
+.hero {
+  min-height:100svh; display:grid;
+  grid-template-columns:1fr 1fr;
+  align-items:center;
+  padding:clamp(80px,10vh,140px) clamp(18px,5%,80px) clamp(60px,8vh,100px);
+  gap:clamp(40px,5vw,80px);
+  position:relative; z-index:10;
+}
+
+/* LEFT */
+.hero-left { display:flex; flex-direction:column; }
+
+.hero-status {
+  display:inline-flex; align-items:center; gap:8px;
+  border:1px solid var(--edge2); border-radius:var(--r-pill);
+  padding:6px 16px; width:fit-content; margin-bottom:28px;
+  background:var(--glass-lt);
+  backdrop-filter:var(--blur-xs);
+  animation:fadeD .8s .2s both;
+}
+.hero-status-dot {
+  width:6px; height:6px; border-radius:50%; background:var(--neon-g);
+  box-shadow:0 0 8px var(--neon-g);
+  animation:statusPulse 2s ease-in-out infinite;
+}
+@keyframes statusPulse { 0%,100%{box-shadow:0 0 8px var(--neon-g)} 50%{box-shadow:0 0 16px var(--neon-g),0 0 30px rgba(0,255,136,0.3)} }
+.hero-status-text { font-family:var(--mono); font-size:.58rem; letter-spacing:.28em; text-transform:uppercase; color:var(--neon-g); }
+
+.hero-title {
+  font-family:var(--sans); font-weight:900;
+  font-size:clamp(42px,7vw,96px);
+  line-height:.92; letter-spacing:-.02em;
+  color:var(--text); margin-bottom:10px;
+  animation:fadeU .9s .4s both;
+}
+.hero-title .line2 {
+  display:block; font-weight:100; font-style:italic;
+  font-size:.8em; color:var(--text-m);
+}
+.hero-title .neon-word {
+  background:linear-gradient(90deg, var(--neon-b), var(--neon-p));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.hero-tagline {
+  font-family:var(--mono); font-size:.75rem; font-weight:300;
+  letter-spacing:.18em; color:var(--text-d); margin-bottom:32px;
+  animation:fadeU .8s .55s both;
+}
+.hero-tagline span { color:var(--neon-b); }
+
+.hero-desc {
+  font-size:clamp(.78rem,1.1vw,.88rem); font-weight:200;
+  letter-spacing:.05em; line-height:1.9; color:var(--text-m);
+  max-width:420px; margin-bottom:40px;
+  animation:fadeU .9s .7s both;
+}
+
+.hero-btns { display:flex; gap:14px; flex-wrap:wrap; animation:fadeU .8s .85s both; }
+
+.btn-neon {
+  font-family:var(--mono); font-size:.68rem; font-weight:500;
+  letter-spacing:.22em; text-transform:uppercase;
+  padding:13px 32px; border-radius:var(--r-pill);
+  text-decoration:none; display:inline-block; cursor:none;
+  position:relative; overflow:hidden; transition:all .3s;
+}
+.btn-neon-b {
+  background:transparent; border:1px solid var(--neon-b); color:var(--neon-b);
+  box-shadow:0 0 20px rgba(0,180,255,0.2), inset 0 0 20px rgba(0,180,255,0.05);
+}
+.btn-neon-b:hover {
+  background:rgba(0,180,255,0.12);
+  box-shadow:0 0 40px rgba(0,180,255,0.4), inset 0 0 30px rgba(0,180,255,0.1);
+  transform:scale(1.03);
+}
+.btn-neon-g {
+  background:var(--neon-g); border:none; color:var(--void); font-weight:700;
+}
+.btn-neon-g:hover { box-shadow:0 0 40px rgba(0,255,136,0.5); transform:scale(1.03); }
+
+/* Service pills */
+.hero-pills { display:flex; flex-wrap:wrap; gap:8px; margin-top:32px; animation:fadeU .8s 1s both; }
+.hero-pill {
+  font-family:var(--mono); font-size:.58rem; letter-spacing:.18em;
+  text-transform:uppercase; padding:5px 14px; border-radius:var(--r-pill);
+  border:1px solid; background:rgba(0,0,0,0.3);
+  backdrop-filter:var(--blur-xs); transition:all .25s; cursor:none;
+}
+.hp-g { border-color:rgba(0,255,136,0.25); color:var(--neon-g); }
+.hp-g:hover { background:rgba(0,255,136,0.1); box-shadow:0 0 16px rgba(0,255,136,0.2); }
+.hp-b { border-color:rgba(0,180,255,0.25); color:var(--neon-b); }
+.hp-b:hover { background:rgba(0,180,255,0.1); box-shadow:0 0 16px rgba(0,180,255,0.2); }
+.hp-p { border-color:rgba(191,0,255,0.25); color:var(--neon-p); }
+.hp-p:hover { background:rgba(191,0,255,0.1); box-shadow:0 0 16px rgba(191,0,255,0.2); }
+.hp-o { border-color:rgba(255,106,0,0.25); color:var(--neon-o); }
+.hp-o:hover { background:rgba(255,106,0,0.1); box-shadow:0 0 16px rgba(255,106,0,0.2); }
+
+/* RIGHT — Layered floating panels */
+.hero-right {
+  position:relative; height:clamp(480px,60vh,600px);
+  animation:fadeU .9s .5s both;
+}
+
+/* Depth layers */
+.depth-layer {
+  position:absolute; transition:transform .6s cubic-bezier(.25,.46,.45,.94);
+}
+.dl-back {
+  inset:40px 0 0 40px;
+  background:rgba(8,13,26,0.5); border-radius:var(--r-lg);
+  border:1px solid var(--edge);
+  backdrop-filter:var(--blur-xs);
+}
+.dl-mid {
+  inset:20px 20px 20px 20px;
+  background:rgba(12,18,36,0.65); border-radius:var(--r-lg);
+  border:1px solid var(--edge2);
+  backdrop-filter:var(--blur-sm);
+  box-shadow:0 8px 40px rgba(0,0,0,0.5);
+}
+.dl-front {
+  inset:0 40px 40px 0;
+  display:flex; flex-direction:column;
+}
+
+/* Main display panel */
+.hero-panel-main {
+  flex:1;
+  background:var(--glass);
+  backdrop-filter:var(--blur-md);
+  border:1px solid var(--edge2);
+  border-radius:var(--r-lg);
+  box-shadow:0 16px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04), 0 0 60px rgba(0,180,255,0.06);
+  overflow:hidden; position:relative;
+}
+.hero-panel-main::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg, transparent, var(--neon-b), var(--neon-p), transparent);
+  opacity:.5;
+}
+
+/* Panel top bar */
+.panel-bar {
+  height:38px; display:flex; align-items:center; gap:8px;
+  padding:0 14px;
+  border-bottom:1px solid var(--edge);
+  background:rgba(8,13,26,0.6);
+}
+.panel-bar-dots { display:flex; gap:5px; }
+.pbd { width:8px; height:8px; border-radius:50%; }
+.pbd:nth-child(1){background:#ff5f57} .pbd:nth-child(2){background:#ffbd2e} .pbd:nth-child(3){background:#28c840}
+.panel-bar-title {
+  font-family:var(--mono); font-size:.58rem; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--text-d); margin-left:8px;
+}
+.panel-bar-status {
+  margin-left:auto; font-family:var(--mono); font-size:.55rem;
+  letter-spacing:.14em; color:var(--neon-g); display:flex; align-items:center; gap:5px;
+}
+.status-blink { width:5px; height:5px; border-radius:50%; background:var(--neon-g); animation:blink 1.2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+/* Panel content */
+.panel-content { padding:16px; display:flex; flex-direction:column; gap:10px; flex:1; }
+
+/* Service cards inside panel */
+.service-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.svc-mini {
+  border-radius:var(--r-sm); padding:12px;
+  background:var(--glass-lt); border:1px solid var(--edge);
+  transition:all .25s;
+}
+.svc-mini:hover { background:var(--glass-md); border-color:var(--edge2); transform:scale(1.02); }
+.svc-mini-tag { font-family:var(--mono); font-size:.52rem; letter-spacing:.2em; text-transform:uppercase; margin-bottom:5px; }
+.svc-mini-val { font-weight:700; font-size:.88rem; color:var(--text); }
+.svc-mini-sub { font-size:.6rem; color:var(--text-d); margin-top:2px; font-weight:200; }
+
+/* Floating mini cards */
+.float-card {
+  position:absolute;
+  background:rgba(8,13,26,0.88);
+  backdrop-filter:var(--blur-md);
+  border:1px solid var(--edge2);
+  border-radius:var(--r-sm);
+  padding:10px 14px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.6);
+  animation:floatAnim 5s ease-in-out infinite alternate;
+  z-index:5;
+}
+.fc1 { top:-20px; right:20px; animation-delay:0s; }
+.fc2 { bottom:60px; left:-20px; animation-delay:2.5s; }
+.fc3 { top:50%; right:-30px; animation-delay:1.5s; }
+@keyframes floatAnim { from{transform:translateY(0)} to{transform:translateY(-10px)} }
+.fc-label { font-family:var(--mono); font-size:.52rem; letter-spacing:.2em; text-transform:uppercase; color:var(--text-d); }
+.fc-val { font-family:var(--sans); font-weight:700; font-size:1rem; margin-top:2px; }
+.fc-sub { font-size:.58rem; color:var(--text-m); font-weight:200; }
+
+/* Network viz in panel */
+.net-viz {
+  flex:1; position:relative; border-radius:var(--r-sm);
+  background:rgba(4,6,14,0.6); border:1px solid var(--edge);
+  overflow:hidden;
+}
+.net-viz canvas { width:100%; height:100%; display:block; }
+
+@keyframes fadeD { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeU { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+/* Scroll indicator */
+.scroll-ind {
+  position:absolute; bottom:28px; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  font-family:var(--mono); font-size:.52rem; letter-spacing:.3em; text-transform:uppercase;
+  color:var(--text-g); animation:fadeD .8s 1.5s both;
+  z-index:20;
+}
+.scroll-line { width:1px; height:36px; background:linear-gradient(to bottom,var(--neon-b),transparent); animation:scrollP 2s ease-in-out infinite; }
+@keyframes scrollP { 0%,100%{opacity:.2;height:24px} 50%{opacity:1;height:48px} }
+
+/* ════════════════════════════════════════
+   ██ SERVICES ROW
+════════════════════════════════════════ */
+.services-row {
+  position:relative; z-index:10;
+  padding:0 clamp(18px,5%,80px) clamp(60px,8vw,100px);
+  display:grid; grid-template-columns:repeat(4,1fr); gap:12px;
+}
+
+.svc-card {
+  padding:28px 22px;
+  position:relative; overflow:hidden; cursor:none;
+}
+.svc-card::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:2px;
+  transform:scaleX(0); transform-origin:left; transition:transform .4s ease;
+}
+.svc-card.sg::after { background:var(--neon-g); }
+.svc-card.sb::after { background:var(--neon-b); }
+.svc-card.sp::after { background:var(--neon-p); }
+.svc-card.so::after { background:var(--neon-o); }
+.svc-card:hover::after { transform:scaleX(1); }
+
+.svc-num {
+  font-family:var(--mono); font-size:.55rem; letter-spacing:.3em;
+  font-weight:300; color:var(--text-g); margin-bottom:16px;
+}
+.svc-icon {
+  width:48px; height:48px; border-radius:12px; margin-bottom:16px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.2rem; transition:transform .3s, box-shadow .3s;
+}
+.svc-card:hover .svc-icon { transform:scale(1.1) rotate(-5deg); }
+.si-g { background:rgba(0,255,136,0.1); color:var(--neon-g); box-shadow:0 0 20px rgba(0,255,136,0.1); }
+.si-b { background:rgba(0,180,255,0.1); color:var(--neon-b); box-shadow:0 0 20px rgba(0,180,255,0.1); }
+.si-p { background:rgba(191,0,255,0.1); color:var(--neon-p); box-shadow:0 0 20px rgba(191,0,255,0.1); }
+.si-o { background:rgba(255,106,0,0.1); color:var(--neon-o); box-shadow:0 0 20px rgba(255,106,0,0.1); }
+.svc-card:hover .si-g { box-shadow:0 0 30px rgba(0,255,136,0.25); }
+.svc-card:hover .si-b { box-shadow:0 0 30px rgba(0,180,255,0.25); }
+.svc-card:hover .si-p { box-shadow:0 0 30px rgba(191,0,255,0.25); }
+.svc-card:hover .si-o { box-shadow:0 0 30px rgba(255,106,0,0.25); }
+
+.svc-title { font-weight:700; font-size:1rem; color:var(--text); margin-bottom:8px; letter-spacing:.02em; }
+.svc-desc { font-size:.72rem; font-weight:200; line-height:1.8; color:var(--text-m); letter-spacing:.04em; }
+.svc-arrow { margin-top:16px; font-size:.65rem; letter-spacing:.12em; transition:gap .25s, color .25s; display:flex; align-items:center; gap:6px; }
+.svc-card.sg .svc-arrow { color:var(--neon-g); }
+.svc-card.sb .svc-arrow { color:var(--neon-b); }
+.svc-card.sp .svc-arrow { color:var(--neon-p); }
+.svc-card.so .svc-arrow { color:var(--neon-o); }
+.svc-card:hover .svc-arrow { gap:12px; }
+
+/* ════════════════════════════════════════
+   ██ 02 — DASHBOARD
+════════════════════════════════════════ */
+.dash-sec { background:rgba(4,6,14,0.5); }
+
+.dash-wrap {
+  margin-top:52px;
+  display:grid;
+  grid-template-columns:240px 1fr;
+  grid-template-rows:auto 1fr;
+  gap:12px;
+  height:clamp(560px,65vh,720px);
+}
+
+/* Sidebar */
+.dash-sb {
+  grid-row:span 2; padding:20px 14px;
+  display:flex; flex-direction:column; gap:4px;
+}
+
+.dsb-logo {
+  display:flex; align-items:center; gap:8px;
+  padding:8px; margin-bottom:16px;
+  font-weight:900; font-size:.9rem; letter-spacing:.12em;
+}
+.dsb-logo .logo-icon { width:24px; height:24px; font-size:.6rem; }
+
+.dsb-section-label {
+  font-family:var(--mono); font-size:.5rem; letter-spacing:.35em;
+  text-transform:uppercase; color:var(--text-g);
+  padding:8px 10px 4px; margin-top:8px;
+}
+
+.dsb-item {
+  display:flex; align-items:center; gap:10px;
+  padding:9px 10px; border-radius:var(--r-sm);
+  font-size:.7rem; font-weight:300; letter-spacing:.06em; color:var(--text-m);
+  cursor:none; transition:background .2s, color .2s, transform .2s;
+}
+.dsb-item:hover, .dsb-item.act {
+  background:rgba(0,180,255,0.08); color:var(--neon-b); transform:translateX(3px);
+}
+.dsb-item.act { background:rgba(0,180,255,0.12); font-weight:400; }
+.dsb-item.act .dsb-i-wrap { color:var(--neon-b); }
+.dsb-i-wrap { width:18px; text-align:center; font-size:.8rem; opacity:.6; transition:opacity .2s; }
+.dsb-item:hover .dsb-i-wrap, .dsb-item.act .dsb-i-wrap { opacity:1; }
+.dsb-badge {
+  margin-left:auto; min-width:18px; height:18px; border-radius:9px;
+  background:var(--neon-b); color:var(--void); font-size:.52rem; font-weight:700;
+  display:flex; align-items:center; justify-content:center; padding:0 5px;
+}
+.dsb-badge.rose { background:var(--neon-p); }
+
+.dsb-sep { height:1px; background:var(--edge); margin:8px 0; }
+.dsb-spacer { flex:1; }
+
+.dsb-user {
+  display:flex; align-items:center; gap:10px; padding:10px;
+  border-radius:var(--r-sm); background:var(--glass-md); border:1px solid var(--edge);
+}
+.dsb-av {
+  width:32px; height:32px; border-radius:50%;
+  background:linear-gradient(135deg,var(--neon-b),var(--neon-p));
+  display:flex; align-items:center; justify-content:center;
+  font-size:.72rem; font-weight:900; color:var(--void); flex-shrink:0;
+}
+.dsb-user-n { font-size:.68rem; font-weight:500; color:var(--text); }
+.dsb-user-r { font-size:.58rem; font-weight:200; color:var(--text-d); margin-top:1px; font-family:var(--mono); }
+
+/* Top bar */
+.dash-topbar {
+  padding:12px 18px;
+  display:flex; align-items:center; gap:12px;
+}
+.dash-tb-title { font-weight:700; font-size:.95rem; color:var(--text); }
+.dash-tb-sub { font-family:var(--mono); font-size:.58rem; color:var(--text-d); letter-spacing:.12em; margin-top:2px; }
+
+.dash-search {
+  margin-left:auto; flex-shrink:0;
+  background:var(--glass-md); border:1px solid var(--edge2);
+  border-radius:var(--r-pill); padding:7px 16px;
+  font-family:var(--mono); font-size:.65rem; color:var(--text);
+  outline:none; letter-spacing:.08em; width:min(220px,40%);
+  transition:border-color .25s, box-shadow .25s;
+}
+.dash-search::placeholder { color:var(--text-g); }
+.dash-search:focus { border-color:rgba(0,180,255,0.3); box-shadow:0 0 20px rgba(0,180,255,0.1); }
+
+.dash-icon-btn {
+  width:32px; height:32px; border-radius:50%;
+  background:var(--glass-md); border:1px solid var(--edge);
+  display:flex; align-items:center; justify-content:center;
+  font-size:.75rem; color:var(--text-m); cursor:none;
+  transition:background .2s, color .2s, transform .2s; flex-shrink:0;
+  position:relative;
+}
+.dash-icon-btn:hover { background:rgba(0,180,255,0.1); color:var(--neon-b); transform:scale(1.1); }
+.notif::after { content:'3'; position:absolute; top:-3px; right:-3px; width:14px; height:14px; border-radius:50%; background:var(--neon-p); font-size:.48rem; font-weight:700; display:flex; align-items:center; justify-content:center; color:var(--void); }
+
+/* Dashboard grid */
+.dash-grid {
+  display:grid;
+  grid-template-columns:repeat(4,1fr) 1fr;
+  grid-template-rows:auto 1fr;
+  gap:10px;
+  overflow:hidden;
+}
+
+/* KPI tiles */
+.kpi {
+  padding:14px 16px; cursor:none;
+  transition:transform .35s cubic-bezier(.25,.46,.45,.94), box-shadow .35s;
+}
+.kpi:hover { transform:translateY(-6px) scale(1.02); }
+.kpi-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.kpi-ic { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:.8rem; }
+.kpi-ic.bg { background:rgba(0,255,136,0.12); color:var(--neon-g); }
+.kpi-ic.bb { background:rgba(0,180,255,0.12); color:var(--neon-b); }
+.kpi-ic.bp { background:rgba(191,0,255,0.12); color:var(--neon-p); }
+.kpi-ic.bo { background:rgba(255,106,0,0.12); color:var(--neon-o); }
+.kpi-delta { font-family:var(--mono); font-size:.56rem; padding:2px 7px; border-radius:var(--r-pill); }
+.kpi-delta.up { background:rgba(0,255,136,0.1); color:var(--neon-g); }
+.kpi-delta.dn { background:rgba(255,106,0,0.12); color:var(--neon-o); }
+.kpi-v { font-weight:900; font-size:1.4rem; color:var(--text); line-height:1; }
+.kpi-l { font-family:var(--mono); font-size:.56rem; letter-spacing:.14em; text-transform:uppercase; color:var(--text-d); margin-top:4px; }
+
+/* AI control panel */
+.ai-ctrl {
+  grid-column:5; grid-row:1/3;
+  padding:16px; display:flex; flex-direction:column; gap:10px;
+}
+.ai-ctrl-title { font-weight:700; font-size:.8rem; color:var(--text); }
+.ai-ctrl-sub { font-family:var(--mono); font-size:.55rem; letter-spacing:.1em; color:var(--text-d); margin-top:2px; }
+
+.ai-metric { }
+.ai-m-top { display:flex; justify-content:space-between; margin-bottom:4px; }
+.ai-m-name { font-size:.65rem; font-weight:300; color:var(--text-m); letter-spacing:.06em; }
+.ai-m-val { font-family:var(--mono); font-size:.65rem; font-weight:500; color:var(--text); }
+.ai-track { height:4px; background:var(--edge); border-radius:2px; overflow:hidden; }
+.ai-fill { height:100%; border-radius:2px; animation:fillAnim 1.5s cubic-bezier(.25,.46,.45,.94) both; }
+@keyframes fillAnim { from{width:0} }
+.f-g { background:linear-gradient(90deg, var(--neon-g), rgba(0,255,136,.3)); }
+.f-b { background:linear-gradient(90deg, var(--neon-b), rgba(0,180,255,.3)); }
+.f-p { background:linear-gradient(90deg, var(--neon-p), rgba(191,0,255,.3)); }
+.f-o { background:linear-gradient(90deg, var(--neon-o), rgba(255,106,0,.3)); }
+
+.ai-sys-status {
+  margin-top:auto;
+  background:rgba(0,255,136,0.06); border:1px solid rgba(0,255,136,0.15);
+  border-radius:var(--r-sm); padding:10px 12px;
+}
+.sys-dot-row { display:flex; align-items:center; gap:7px; }
+.sys-dot { width:6px; height:6px; border-radius:50%; background:var(--neon-g); animation:blink 1.5s ease-in-out infinite; flex-shrink:0; }
+.sys-txt { font-family:var(--mono); font-size:.58rem; color:var(--neon-g); letter-spacing:.1em; }
+
+/* Main chart panel */
+.dash-chart {
+  grid-column:1/5; padding:16px;
+  display:flex; flex-direction:column; gap:10px;
+}
+.chart-head { display:flex; align-items:center; justify-content:space-between; }
+.chart-title { font-weight:700; font-size:.82rem; color:var(--text); }
+.chart-tabs { display:flex; gap:4px; }
+.chart-tab {
+  font-family:var(--mono); font-size:.56rem; letter-spacing:.14em;
+  padding:5px 12px; border-radius:var(--r-pill); cursor:none;
+  border:1px solid var(--edge); color:var(--text-d); background:transparent;
+  font-family:var(--mono); transition:all .2s;
+}
+.chart-tab.a { background:rgba(0,180,255,0.1); border-color:rgba(0,180,255,0.3); color:var(--neon-b); }
+.chart-tab:hover:not(.a) { border-color:var(--edge2); color:var(--text-m); }
+
+.bars-area { display:flex; align-items:flex-end; gap:5px; flex:1; height:100px; }
+.bar-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:none; }
+.bar-wrap { width:100%; flex:1; display:flex; align-items:flex-end; }
+.bar-inner {
+  width:100%; border-radius:3px 3px 0 0;
+  background:linear-gradient(to top, var(--neon-b), rgba(0,180,255,0.3));
+  animation:barUp 1.2s cubic-bezier(.25,.46,.45,.94) both;
+  position:relative; overflow:hidden; transition:opacity .2s;
+}
+.bar-inner.hi { background:linear-gradient(to top, var(--neon-p), rgba(191,0,255,0.4)); }
+.bar-inner::after { content:''; position:absolute; inset:0; background:linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent); transform:translateX(-100%); transition:transform .4s; }
+.bar-col:hover .bar-inner::after { transform:translateX(100%); }
+.bar-col:hover .bar-inner { opacity:.85; }
+.bar-lbl { font-family:var(--mono); font-size:.5rem; color:var(--text-g); letter-spacing:.08em; }
+@keyframes barUp { from{height:0!important} }
+
+/* ════════════════════════════════════════
+   ██ 03 — ANALYTICS
+════════════════════════════════════════ */
+.an-grid {
+  margin-top:52px;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:14px;
+}
+
+.an-card { padding:22px; cursor:none; }
+.an-card.w2 { grid-column:span 2; }
+.an-card.w3 { grid-column:span 3; }
+
+.an-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+.an-title { font-weight:700; font-size:.82rem; color:var(--text); }
+.tag-pill {
+  font-family:var(--mono); font-size:.53rem; letter-spacing:.16em; text-transform:uppercase;
+  padding:3px 10px; border-radius:var(--r-pill); border:1px solid;
+}
+.tg-g { background:rgba(0,255,136,0.08); border-color:rgba(0,255,136,0.2); color:var(--neon-g); }
+.tg-b { background:rgba(0,180,255,0.08); border-color:rgba(0,180,255,0.2); color:var(--neon-b); }
+.tg-p { background:rgba(191,0,255,0.08); border-color:rgba(191,0,255,0.2); color:var(--neon-p); }
+.tg-o { background:rgba(255,106,0,0.08); border-color:rgba(255,106,0,0.2); color:var(--neon-o); }
+
+/* Donut */
+.donut-wrap { display:flex; align-items:center; gap:20px; }
+.donut-svg { width:90px; height:90px; flex-shrink:0; transform:rotate(-90deg); }
+.donut-track { fill:none; stroke:var(--edge2); stroke-width:10; }
+.donut-seg { fill:none; stroke-width:10; stroke-linecap:round; stroke-dasharray:251; animation:donutDraw 1.5s cubic-bezier(.25,.46,.45,.94) .3s both; }
+@keyframes donutDraw { from{stroke-dashoffset:251} }
+.donut-c { position:relative; display:flex; align-items:center; justify-content:center; }
+.donut-cval { position:absolute; font-weight:900; font-size:1rem; color:var(--text); }
+.donut-legend { display:flex; flex-direction:column; gap:7px; }
+.dl-row { display:flex; align-items:center; gap:7px; font-size:.62rem; color:var(--text-m); font-weight:300; }
+.dl-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+/* Line chart */
+.line-chart-wrap { height:100px; }
+.line-chart-wrap svg { width:100%; height:100%; overflow:visible; }
+.lc-path { fill:none; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+.lc-area { opacity:.12; }
+.lc-grid { stroke:var(--edge); stroke-width:.5; }
+
+/* Stat boxes */
+.stat-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.stat-b { background:var(--glass-lt); border:1px solid var(--edge); border-radius:var(--r-sm); padding:14px 16px; transition:all .2s; }
+.stat-b:hover { background:var(--glass-md); border-color:var(--edge2); }
+.stat-bv { font-weight:900; font-size:1.4rem; color:var(--text); line-height:1; }
+.stat-bl { font-family:var(--mono); font-size:.56rem; letter-spacing:.16em; text-transform:uppercase; color:var(--text-d); margin-top:4px; }
+.stat-bd { font-size:.62rem; font-weight:400; margin-top:6px; }
+
+/* Map dots */
+.map-box { height:130px; border-radius:var(--r-sm); background:rgba(4,6,14,0.7); border:1px solid var(--edge); overflow:hidden; position:relative; }
+.map-dots-bg {
+  position:absolute; inset:0;
+  background-image:radial-gradient(circle,rgba(0,180,255,0.18) 1px,transparent 1px);
+  background-size:20px 14px;
+  mask-image:ellipse(48% 46% at 50% 50%); mask-size:100% 100%;
+}
+.map-ping { position:absolute; width:8px; height:8px; border-radius:50%; }
+.map-ping::after { content:''; position:absolute; inset:-4px; border-radius:50%; border:1px solid; animation:pingRing 2.5s ease-out infinite; opacity:0; }
+.mp1 { top:35%;left:22%; background:var(--neon-b); } .mp1::after { border-color:var(--neon-b); }
+.mp2 { top:42%;left:48%; background:var(--neon-g); animation-delay:.8s; } .mp2::after { border-color:var(--neon-g); }
+.mp3 { top:38%;left:70%; background:var(--neon-p); animation-delay:1.4s; } .mp3::after { border-color:var(--neon-p); }
+.mp4 { top:58%;left:80%; background:var(--neon-o); animation-delay:.4s; } .mp4::after { border-color:var(--neon-o); }
+@keyframes pingRing { 0%{transform:scale(1);opacity:.6} 100%{transform:scale(4);opacity:0} }
+@keyframes mapPingPulse { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 10px 2px rgba(0,180,255,0.3)} }
+
+/* ════════════════════════════════════════
+   ██ 04 — WIDGETS
+════════════════════════════════════════ */
+.widgets-grid {
+  margin-top:52px;
+  display:grid; grid-template-columns:repeat(3,1fr); gap:14px;
+}
+
+.wg { padding:20px; cursor:none; }
+.wg-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.wg-title { font-weight:700; font-size:.8rem; color:var(--text); }
+.wg-ic { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:.8rem; }
+
+/* Toggle widget */
+.wg-toggle-list { display:flex; flex-direction:column; gap:8px; }
+.wg-toggle-row { display:flex; align-items:center; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--edge); }
+.wg-toggle-row:last-child { border-bottom:none; }
+.wg-toggle-label { font-size:.68rem; font-weight:300; color:var(--text-m); letter-spacing:.05em; }
+.sw { width:34px; height:18px; border-radius:9px; background:var(--edge2); position:relative; cursor:none; transition:background .3s; }
+.sw.on { background:var(--neon-b); }
+.sw::after { content:''; position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:white; transition:transform .3s cubic-bezier(.25,.46,.45,.94), box-shadow .3s; }
+.sw.on::after { transform:translateX(16px); box-shadow:0 0 8px var(--neon-b); }
+
+/* Progress widget */
+.wg-prog-list { display:flex; flex-direction:column; gap:10px; }
+.wg-prog { }
+.wg-prog-top { display:flex; justify-content:space-between; margin-bottom:5px; }
+.wg-prog-name { font-size:.66rem; font-weight:300; color:var(--text-m); letter-spacing:.05em; }
+.wg-prog-pct { font-family:var(--mono); font-size:.64rem; font-weight:500; color:var(--text); }
+.wg-prog-track { height:5px; background:var(--edge); border-radius:3px; overflow:hidden; }
+.wg-prog-fill { height:100%; border-radius:3px; animation:fillAnim 1.4s cubic-bezier(.25,.46,.45,.94) both; }
+
+/* Feed widget */
+.feed-list { display:flex; flex-direction:column; gap:8px; }
+.feed-item { display:flex; align-items:center; gap:10px; padding:9px; border-radius:var(--r-sm); background:var(--glass-lt); border:1px solid var(--edge); transition:background .2s, border-color .2s; }
+.feed-item:hover { background:var(--glass-md); border-color:var(--edge2); }
+.feed-av { width:28px; height:28px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:.6rem; font-weight:900; color:var(--void); }
+.feed-text .f-n { font-size:.65rem; font-weight:500; color:var(--text); }
+.feed-text .f-m { font-size:.6rem; font-weight:200; color:var(--text-d); margin-top:1px; }
+.feed-time { font-family:var(--mono); font-size:.52rem; color:var(--text-g); margin-left:auto; }
+
+/* Score widget */
+.wg-score-center { text-align:center; padding:8px 0; }
+.score-ring { position:relative; width:100px; height:100px; margin:0 auto 12px; }
+.score-ring svg { transform:rotate(-90deg); }
+.score-ring-val { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:1.4rem; color:var(--neon-g); font-family:var(--sans); }
+.score-lbl { font-family:var(--mono); font-size:.58rem; letter-spacing:.2em; text-transform:uppercase; color:var(--text-d); }
+
+/* Sparkline widget */
+.spark-row { display:flex; align-items:flex-end; gap:3px; height:54px; margin:12px 0; }
+.sp-bar { flex:1; border-radius:2px 2px 0 0; background:rgba(0,180,255,0.2); transition:background .2s; animation:barUp 1s cubic-bezier(.25,.46,.45,.94) both; cursor:none; }
+.sp-bar:hover { background:var(--neon-b); }
+.sp-bar.hi { background:rgba(191,0,255,0.4); }
+.sp-meta { display:flex; justify-content:space-between; }
+.sp-meta span { font-family:var(--mono); font-size:.56rem; color:var(--text-d); }
+
+/* Clock widget */
+.wg-clock { text-align:center; }
+.wg-time { font-family:var(--mono); font-size:2rem; font-weight:500; color:var(--text); letter-spacing:.05em; line-height:1; }
+.wg-date { font-size:.6rem; color:var(--text-d); letter-spacing:.2em; text-transform:uppercase; margin-top:6px; }
+.wg-zones { display:flex; gap:6px; margin-top:12px; }
+.wz { flex:1; background:var(--glass-lt); border:1px solid var(--edge); border-radius:var(--r-sm); padding:7px; text-align:center; }
+.wz-city { font-family:var(--mono); font-size:.5rem; letter-spacing:.12em; text-transform:uppercase; color:var(--text-d); }
+.wz-time { font-family:var(--mono); font-size:.72rem; font-weight:500; color:var(--text); margin-top:2px; }
+
+/* ════════════════════════════════════════
+   ██ 05 — STYLE / NEON GLASS SHOWCASE
+════════════════════════════════════════ */
+.style-sec { position:relative; }
+.style-sec::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 60% 50% at 50% 50%, rgba(0,180,255,0.04) 0%, transparent 65%); pointer-events:none; }
+
+.style-grid {
+  margin-top:52px;
+  display:grid; grid-template-columns:repeat(3,1fr); gap:14px;
+}
+
+.style-card { padding:24px; cursor:none; }
+
+/* Neon borders demo */
+.neon-borders { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
+.nb-chip {
+  border-radius:var(--r-sm); padding:12px 14px;
+  font-size:.7rem; font-weight:300; letter-spacing:.06em;
+  background:rgba(0,0,0,0.3); border:1px solid;
+  transition:box-shadow .3s, transform .2s; cursor:none;
+}
+.nb-chip:hover { transform:translateX(6px); }
+.nb-g { border-color:rgba(0,255,136,0.3); color:var(--neon-g); }
+.nb-g:hover { box-shadow:0 0 20px rgba(0,255,136,0.25), inset 0 0 20px rgba(0,255,136,0.05); }
+.nb-b { border-color:rgba(0,180,255,0.3); color:var(--neon-b); }
+.nb-b:hover { box-shadow:0 0 20px rgba(0,180,255,0.25), inset 0 0 20px rgba(0,180,255,0.05); }
+.nb-p { border-color:rgba(191,0,255,0.3); color:var(--neon-p); }
+.nb-p:hover { box-shadow:0 0 20px rgba(191,0,255,0.25), inset 0 0 20px rgba(191,0,255,0.05); }
+.nb-o { border-color:rgba(255,106,0,0.3); color:var(--neon-o); }
+.nb-o:hover { box-shadow:0 0 20px rgba(255,106,0,0.25), inset 0 0 20px rgba(255,106,0,0.05); }
+
+/* Typography display */
+.typo-demo { display:flex; flex-direction:column; gap:12px; }
+.td-row { border-bottom:1px solid var(--edge); padding-bottom:10px; }
+.td-row:last-child { border-bottom:none; }
+.td-head { font-family:var(--sans); font-weight:900; font-size:1.6rem; color:var(--text); letter-spacing:-.01em; line-height:1; }
+.td-sub { font-family:var(--mono); font-size:.6rem; letter-spacing:.2em; color:var(--text-d); margin-top:3px; }
+
+/* Glass depth demo */
+.glass-layers { position:relative; height:140px; margin-top:12px; }
+.gl { position:absolute; border-radius:var(--r-md); border:1px solid var(--edge); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; transition:transform .3s; cursor:none; }
+.gl:hover { transform:scale(1.05); }
+.gl1 { inset:20px 30px 0 0; background:rgba(12,18,36,0.3); backdrop-filter:blur(4px); color:var(--text-g); border-color:rgba(255,255,255,0.04); }
+.gl2 { inset:10px 15px 10px 15px; background:rgba(12,18,36,0.55); backdrop-filter:blur(12px); color:var(--text-d); border-color:rgba(255,255,255,0.07); }
+.gl3 { inset:0 30px 20px 0; background:rgba(12,18,36,0.8); backdrop-filter:blur(24px); color:var(--text-m); border-color:rgba(255,255,255,0.11); }
+
+/* Colour palettes */
+.palette-row { display:flex; gap:6px; margin-top:12px; flex-wrap:wrap; }
+.pal-chip { border-radius:var(--r-sm); transition:transform .25s, box-shadow .25s; cursor:none; }
+.pal-chip:hover { transform:scale(1.1); }
+
+/* ════════════════════════════════════════
+   ██ WORK GRID
+════════════════════════════════════════ */
+.work-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
+  margin-top:52px;
+}
+.work-card {
+  aspect-ratio:.9; padding:20px;
+  position:relative; overflow:hidden; cursor:none;
+  transition:transform .4s cubic-bezier(.25,.46,.45,.94), box-shadow .4s;
+}
+.work-card:hover { transform:translateY(-10px); }
+.work-card-bg { position:absolute; inset:0; transition:transform .6s ease; }
+.work-card:hover .work-card-bg { transform:scale(1.06); }
+.wc1 .work-card-bg { background:linear-gradient(145deg, #0a1a10 0%, #051208 100%); }
+.wc2 .work-card-bg { background:linear-gradient(145deg, #0a0f1c 0%, #060a14 100%); }
+.wc3 .work-card-bg { background:linear-gradient(145deg, #140a20 0%, #0c051a 100%); }
+.wc4 .work-card-bg { background:linear-gradient(145deg, #1a0d08 0%, #120806 100%); }
+.wc5 .work-card-bg { background:linear-gradient(145deg, #0a1218 0%, #060a10 100%); }
+.wc6 .work-card-bg { background:linear-gradient(145deg, #100a1a 0%, #0c0614 100%); }
+/* real image layer inside each card */
+.work-card-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.55;transition:opacity .5s ease,transform .6s ease;z-index:0;}
+.work-card:hover .work-card-photo{opacity:0.72;transform:scale(1.06);}
+.work-card-dim{position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.92) 0%,rgba(2,4,8,0.35) 50%,transparent 100%);z-index:1;}
+
+.work-card-wm {
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-family:var(--sans); font-weight:900; font-size:clamp(50px,7vw,90px);
+  letter-spacing:-.02em; opacity:.05; user-select:none; pointer-events:none; color:var(--text);
+}
+.work-card-content { position:relative; z-index:2; height:100%; display:flex; flex-direction:column; }
+.work-cat { font-family:var(--mono); font-size:.56rem; letter-spacing:.3em; text-transform:uppercase; margin-bottom:auto; }
+.work-name { font-weight:700; font-size:1.05rem; color:var(--text); line-height:1.2; margin-bottom:6px; }
+.work-sub { font-size:.68rem; font-weight:200; color:var(--text-m); letter-spacing:.05em; }
+.work-card-shine { position:absolute; bottom:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent); transform:scaleX(0); transform-origin:left; transition:transform .5s ease; }
+.work-card:hover .work-card-shine { transform:scaleX(1); }
+
+/* ════════════════════════════════════════
+   ██ CTA
+════════════════════════════════════════ */
+.cta-sec { text-align:center; padding:clamp(80px,10vw,140px) clamp(18px,5%,80px); position:relative; z-index:10; }
+.cta-glow-ring { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:min(700px,80vw); height:300px; background:radial-gradient(ellipse,rgba(0,180,255,0.07) 0%,transparent 65%); filter:blur(40px); pointer-events:none; }
+.cta-box { max-width:800px; margin:0 auto; padding:clamp(40px,6vw,80px); position:relative; }
+.cta-box::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg, transparent, var(--neon-b), var(--neon-p), var(--neon-g), transparent); opacity:.6; }
+.cta-h { font-family:var(--sans); font-weight:900; font-size:clamp(28px,5vw,60px); line-height:1.0; letter-spacing:-.01em; color:var(--text); margin-bottom:14px; }
+.cta-sub { font-size:clamp(.75rem,1.1vw,.88rem); font-weight:200; letter-spacing:.06em; line-height:1.9; color:var(--text-m); max-width:440px; margin:0 auto 36px; }
+.cta-btns { display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; }
+
+/* INPUT */
+.input-row { display:flex; gap:0; max-width:420px; margin:0 auto 20px; }
+.nl-in { flex:1; padding:12px 18px; background:var(--glass-md); border:1px solid var(--edge2); border-right:none; border-radius:var(--r-pill) 0 0 var(--r-pill); font-family:var(--mono); font-size:.68rem; color:var(--text); outline:none; transition:border-color .25s; }
+.nl-in::placeholder { color:var(--text-g); }
+.nl-in:focus { border-color:rgba(0,180,255,0.3); }
+.nl-btn { padding:12px 22px; background:var(--neon-b); border:none; border-radius:0 var(--r-pill) var(--r-pill) 0; font-family:var(--mono); font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:var(--void); cursor:none; font-weight:500; transition:background .25s, box-shadow .25s; }
+.nl-btn:hover { background:rgba(0,180,255,0.85); box-shadow:0 0 24px rgba(0,180,255,0.4); }
+
+/* ════════════════════════════════════════
+   FOOTER
+════════════════════════════════════════ */
+footer {
+  position:relative; z-index:10;
+  border-top:1px solid var(--edge);
+  padding:clamp(48px,7vw,80px) clamp(18px,5%,80px) 28px;
+}
+.foot-top { display:grid; grid-template-columns:1.6fr 1fr 1fr 1fr; gap:clamp(24px,4vw,60px); padding-bottom:40px; border-bottom:1px solid var(--edge); }
+.foot-logo-wrap { }
+.foot-logo { display:flex; align-items:center; gap:8px; font-weight:900; font-size:1.1rem; letter-spacing:.12em; color:var(--text); text-decoration:none; margin-bottom:10px; }
+.foot-tag { font-size:.68rem; font-weight:200; letter-spacing:.08em; color:var(--text-d); line-height:1.7; max-width:220px; margin-bottom:22px; }
+.foot-socials { display:flex; gap:8px; flex-wrap:wrap; }
+.foot-soc { width:32px; height:32px; border-radius:var(--r-xs); background:var(--glass-md); border:1px solid var(--edge2); display:flex; align-items:center; justify-content:center; font-size:.6rem; color:var(--text-d); font-family:var(--mono); text-decoration:none; transition:all .2s; }
+.foot-soc:hover { background:rgba(0,180,255,0.1); border-color:rgba(0,180,255,0.3); color:var(--neon-b); transform:translateY(-3px); }
+.foot-col-h { font-family:var(--mono); font-size:.58rem; letter-spacing:.38em; text-transform:uppercase; color:var(--neon-b); margin-bottom:16px; }
+.foot-links { list-style:none; display:flex; flex-direction:column; gap:9px; }
+.foot-links a { font-size:.72rem; font-weight:200; letter-spacing:.06em; color:var(--text-d); text-decoration:none; transition:color .2s; }
+.foot-links a:hover { color:var(--text); }
+.foot-bot { padding-top:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+.foot-copy { font-family:var(--mono); font-size:.56rem; letter-spacing:.2em; text-transform:uppercase; color:var(--text-g); }
+.foot-legal { display:flex; gap:18px; }
+.foot-legal a { font-family:var(--mono); font-size:.56rem; letter-spacing:.18em; text-transform:uppercase; color:var(--text-g); text-decoration:none; transition:color .2s; }
+.foot-legal a:hover { color:var(--text-d); }
+
+/* ════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════ */
+@media (max-width:1024px) {
+  .nav-links { display:none; }
+  .hbg { display:flex; }
+  .mob-nav { display:flex; }
+  .nav-btn-ghost { display:none; }
+  .hero { grid-template-columns:1fr; }
+  .hero-right { height:360px; }
+  .services-row { grid-template-columns:repeat(2,1fr); }
+  .dash-wrap { grid-template-columns:1fr; height:auto; }
+  .dash-sb { grid-row:auto; }
+  .dash-grid { grid-template-columns:repeat(2,1fr); }
+  .ai-ctrl { grid-column:auto; grid-row:auto; }
+  .dash-chart { grid-column:span 2; }
+  .an-grid { grid-template-columns:1fr 1fr; }
+  .an-card.w2 { grid-column:span 2; }
+  .an-card.w3 { grid-column:span 2; }
+  .widgets-grid { grid-template-columns:repeat(2,1fr); }
+  .style-grid { grid-template-columns:1fr 1fr; }
+  .work-grid { grid-template-columns:repeat(2,1fr); }
+  .foot-top { grid-template-columns:1fr 1fr; }
+}
+@media (max-width:640px) {
+  .hero-title { font-size:clamp(36px,10vw,56px); }
+  .services-row { grid-template-columns:1fr; }
+  .dash-grid { grid-template-columns:repeat(2,1fr); }
+  .an-grid { grid-template-columns:1fr; }
+  .an-card.w2, .an-card.w3 { grid-column:span 1; }
+  .widgets-grid { grid-template-columns:1fr; }
+  .style-grid { grid-template-columns:1fr; }
+  .work-grid { grid-template-columns:1fr; }
+  .foot-top { grid-template-columns:1fr; }
+  .foot-bot { flex-direction:column; align-items:flex-start; }
+  .stat-row { grid-template-columns:1fr 1fr; }
+  #C, #CR { display:none; }
+  body { cursor:auto; }
+  .hbg { cursor:pointer; }
+}
+</style>
+</head>
+<body>
+
+<!-- BG SYSTEM -->
+<div class="bg"></div>
+<div class="bg-grid"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+<div class="scanline"></div>
+<div class="grain"></div>
+
+<!-- SVG DEFS -->
+<svg width="0" height="0" style="position:absolute;pointer-events:none">
+  <defs>
+    <linearGradient id="lg1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#00ff88"/><stop offset="100%" stop-color="#00b4ff"/></linearGradient>
+    <linearGradient id="lg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#00b4ff"/><stop offset="100%" stop-color="#bf00ff"/></linearGradient>
+    <linearGradient id="lg3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#bf00ff"/><stop offset="100%" stop-color="#ff6a00"/></linearGradient>
+    <linearGradient id="la1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00b4ff" stop-opacity=".4"/><stop offset="100%" stop-color="#00b4ff" stop-opacity="0"/></linearGradient>
+    <linearGradient id="la2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00ff88" stop-opacity=".3"/><stop offset="100%" stop-color="#00ff88" stop-opacity="0"/></linearGradient>
+  </defs>
+</svg>
+
+<!-- CURSOR -->
+<div id="C"></div>
+<div id="CR"></div>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav" id="nav">
+  <a href="#" class="nav-logo"><div class="logo-icon">HX</div>HXZE</a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#dashboard">Dashboard</a></li>
+    <li><a href="#analytics">Analytics</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-r">
+    <a href="#" class="nav-btn nav-btn-ghost">Sign In</a>
+    <a href="#contact" class="nav-btn nav-btn-solid">Get Started</a>
+  </div>
+  <div class="hbg" id="hbg"><span></span><span></span><span></span></div>
+</nav>
+
+<div class="mob-nav" id="mobNav">
+  <a href="#services">Services</a>
+  <a href="#dashboard">Dashboard</a>
+  <a href="#analytics">Analytics</a>
+  <a href="#work">Work</a>
+  <a href="#contact">Contact</a>
+</div>
+
+<!-- ════════════════════════════════════════
+     ██ 01 — HERO / LANDING
+════════════════════════════════════════ -->
+<section class="hero" id="home">
+
+  <!-- LEFT -->
+  <div class="hero-left">
+    <div class="hero-status">
+      <div class="hero-status-dot"></div>
+      <span class="hero-status-text">Available for Projects — 2026</span>
+    </div>
+
+    <h1 class="hero-title">
+      HXZE
+      <span class="line2">Creative <span class="neon-word">Studio</span></span>
+    </h1>
+
+    <div class="hero-tagline">
+      SYS_ID: <span>HXZ-2026</span> &nbsp;|&nbsp; INTELLIGENCE_LAYER: <span>ACTIVE</span>
+    </div>
+
+    <p class="hero-desc">
+      We build across every dimension — websites, graphic identities, clothing lines, and network architectures. One studio, infinite output. Powered by design intelligence.
+    </p>
+
+    <div class="hero-btns">
+      <a href="#work" class="btn-neon btn-neon-g">View Our Work</a>
+      <a href="#contact" class="btn-neon btn-neon-b">Start a Project ↗</a>
+    </div>
+
+    <div class="hero-pills">
+      <span class="hero-pill hp-g">Graphic Design</span>
+      <span class="hero-pill hp-b">Web Design</span>
+      <span class="hero-pill hp-p">Clothing Design</span>
+      <span class="hero-pill hp-o">Network Design</span>
+    </div>
+  </div>
+
+  <!-- RIGHT — Layered depth panels -->
+  <div class="hero-right">
+    <div class="depth-layer dl-back"></div>
+    <div class="depth-layer dl-mid"></div>
+    <div class="depth-layer dl-front">
+      <div class="hero-panel-main panel">
+        <div class="panel-bar">
+          <div class="panel-bar-dots">
+            <div class="pbd"></div><div class="pbd"></div><div class="pbd"></div>
+          </div>
+          <div class="panel-bar-title">HXZE // CONTROL SURFACE</div>
+          <div class="panel-bar-status"><div class="status-blink"></div>LIVE</div>
+        </div>
+        <div class="panel-content">
+          <div class="service-row">
+            <div class="svc-mini">
+              <div class="svc-mini-tag neon-g">Web</div>
+              <div class="svc-mini-val">48</div>
+              <div class="svc-mini-sub">Sites Delivered</div>
+            </div>
+            <div class="svc-mini">
+              <div class="svc-mini-tag neon-p">Apparel</div>
+              <div class="svc-mini-val">12</div>
+              <div class="svc-mini-sub">Collections</div>
+            </div>
+            <div class="svc-mini">
+              <div class="svc-mini-tag neon-b" style="color:var(--neon-b)">Graphics</div>
+              <div class="svc-mini-val">200+</div>
+              <div class="svc-mini-sub">Brand Assets</div>
+            </div>
+            <div class="svc-mini">
+              <div class="svc-mini-tag neon-o">Network</div>
+              <div class="svc-mini-val">35</div>
+              <div class="svc-mini-sub">Infra Built</div>
+            </div>
+          </div>
+          <!-- Preview image strip inside hero panel -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;border-radius:10px;overflow:hidden;">
+            <img src="https://images.unsplash.com/photo-1626785774573-4b799315345d?w=300&q=75" loading="lazy" style="width:100%;height:72px;object-fit:cover;display:block;">
+            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&q=75" loading="lazy" style="width:100%;height:72px;object-fit:cover;display:block;">
+            <img src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=300&q=75" loading="lazy" style="width:100%;height:72px;object-fit:cover;display:block;">
+          </div>
+          <div class="net-viz">
+            <canvas id="networkCanvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating cards -->
+    <div class="float-card fc1">
+      <div class="fc-label">Active Clients</div>
+      <div class="fc-val neon-g">24</div>
+      <div class="fc-sub">↑ 6 this month</div>
+    </div>
+    <div class="float-card fc2">
+      <div class="fc-label">Response Time</div>
+      <div class="fc-val neon-b">< 2h</div>
+      <div class="fc-sub">Avg. reply</div>
+    </div>
+    <div class="float-card fc3">
+      <div class="fc-label">Satisfaction</div>
+      <div class="fc-val neon-p">98%</div>
+      <div class="fc-sub">Client rating</div>
+    </div>
+  </div>
+
+  <div class="scroll-ind">
+    <div class="scroll-line"></div>
+    Scroll
+  </div>
+</section>
+
+<!-- ═══ SERVICES ═══ -->
+<style>
+.svc-card{position:relative;overflow:hidden;}
+.svc-card-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.07;transition:opacity .4s ease,transform .5s ease;z-index:0;filter:saturate(1.4);}
+.svc-card:hover .svc-card-img{opacity:0.16;transform:scale(1.06);}
+.svc-card>*:not(.svc-card-img){position:relative;z-index:1;}
+</style>
+<div class="services-row" id="services">
+  <div class="svc-card panel panel-lift border-g sg rv">
+    <img class="svc-card-img" src="https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&q=80" alt="" loading="lazy">
+    <div class="svc-num">01 —</div>
+    <div class="svc-icon si-g">⬡</div>
+    <div class="svc-title">Graphic Design</div>
+    <div class="svc-desc">Brand identities, logos, print, packaging and motion graphics. Visual systems that are unmistakably yours.</div>
+    <div class="svc-arrow">Explore <span>→</span></div>
+  </div>
+  <div class="svc-card panel panel-lift border-b sb rv" style="transition-delay:.08s">
+    <img class="svc-card-img" src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=600&q=80" alt="" loading="lazy">
+    <div class="svc-num">02 —</div>
+    <div class="svc-icon si-b">◈</div>
+    <div class="svc-title">Web Design</div>
+    <div class="svc-desc">Glass UI, responsive builds, e-commerce, landing pages and full-stack web experiences that convert.</div>
+    <div class="svc-arrow">Explore <span>→</span></div>
+  </div>
+  <div class="svc-card panel panel-lift border-p sp rv" style="transition-delay:.16s">
+    <img class="svc-card-img" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80" alt="" loading="lazy">
+    <div class="svc-num">03 —</div>
+    <div class="svc-icon si-p">✦</div>
+    <div class="svc-title">Clothing Design</div>
+    <div class="svc-desc">Apparel collections, textile graphics, lookbook direction and garment tech-pack production.</div>
+    <div class="svc-arrow">Explore <span>→</span></div>
+  </div>
+  <div class="svc-card panel panel-lift border-o so rv" style="transition-delay:.24s">
+    <img class="svc-card-img" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=80" alt="" loading="lazy">
+    <div class="svc-num">04 —</div>
+    <div class="svc-icon si-o">≋</div>
+    <div class="svc-title">Network Design</div>
+    <div class="svc-desc">Infrastructure architecture, topology maps, security layers and enterprise network system design.</div>
+    <div class="svc-arrow">Explore <span>→</span></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     ██ 02 — DASHBOARD
+════════════════════════════════════════ -->
+</div>
+
+<!-- ════════════════════════════════════════
+     ██ WORK GRID
+════════════════════════════════════════ -->
+<section class="sec" id="work" style="background:rgba(4,6,14,0.4)">
+  <div class="rv">
+    <p class="sec-tag to">06 — Selected Work</p>
+    <h2 class="sec-h">Built by <span class="neon-o">HXZE</span></h2>
+    <p class="sec-sub">A cross-discipline portfolio — spanning pixels, fabric, identities and infrastructure.</p>
+  </div>
+
+  <div class="work-grid">
+    <div class="work-card panel wc1 panel-lift border-g rv">
+      <div class="work-card-bg"></div>
+      <img class="work-card-photo" src="logos/WhatsApp Image 2026-04-05 at 19.50.48 (1).jpeg" alt="Graphic Design — NOCTURNE Brand Identity" loading="lazy">
+      <div class="work-card-dim"></div>
+      <div class="work-card-wm">GFX</div>
+      <div class="work-card-content">
+        <div class="work-cat neon-g">Graphic Design</div>
+        <div class="work-name">NOCTURNE<br>Brand Identity</div>
+        <div class="work-sub">Full visual system — logo, type, colour, print</div>
+      </div>
+      <div class="work-card-shine"></div>
+    </div>
+    <div class="work-card panel wc2 panel-lift border-b rv" style="transition-delay:.08s">
+      <div class="work-card-bg"></div>
+      <img class="work-card-photo" src="web/maison.png" alt="Web Design — MAISON AVRE E-Commerce" loading="lazy">
+      <div class="work-card-dim"></div>
+      <div class="work-card-wm">WEB</div>
+      <div class="work-card-content">
+        <div class="work-cat neon-b">Web Design</div>
+        <div class="work-name">MAISON AVRE<br>E-Commerce</div>
+        <div class="work-sub">Full-stack luxury fashion storefront</div>
+      </div>
+      <div class="work-card-shine"></div>
+    </div>
+    <div class="work-card panel wc3 panel-lift border-p rv" style="transition-delay:.16s">
+      <div class="work-card-bg"></div>
+      <img class="work-card-photo" src="https://images.unsplash.com/photo-1521334884684-d80222895322?w=700&q=85" alt="Clothing Design — VLTGE Drop 03" loading="lazy">
+      <div class="work-card-dim"></div>
+      <div class="work-card-wm">APR</div>
+      <div class="work-card-content">
+        <div class="work-cat neon-p">Clothing Design</div>
+        <div class="work-name">VLTGE<br>Drop 03</div>
+        <div class="work-sub">12-piece apparel collection + tech packs</div>
+      </div>
+      <div class="work-card-shine"></div>
+    </div>
+    <div class="work-card panel wc4 panel-lift border-o rv" style="transition-delay:.24s">
+      <div class="work-card-bg"></div>
+      <img class="work-card-photo" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=700&q=85" alt="Network Design — ARK CORP Infrastructure" loading="lazy">
+      <div class="work-card-dim"></div>
+      <div class="work-card-wm">NET</div>
+      <div class="work-card-content">
+        <div class="work-cat neon-o">Network Design</div>
+        <div class="work-name">ARK CORP<br>Infrastructure</div>
+        <div class="work-sub">Enterprise topology + security architecture</div>
+      </div>
+      <div class="work-card-shine"></div>
+    </div>
+    <div class="work-card panel wc5 panel-lift border-b rv" style="transition-delay:.32s">
+      <div class="work-card-bg"></div>
+      <img class="work-card-photo" src="web/meridian.png" alt="Web Design — HAZE STUDIO Portfolio" loading="lazy">
+      <div class="work-card-dim"></div>
+      <div class="work-card-wm">WEB</div>
+      <div class="work-card-content">
+        <div class="work-cat neon-b">Web Design</div>
+        <div class="work-name">HAZE STUDIO<br>Portfolio</div>
+        <div class="work-sub">Creative agency landing + case studies</div>
+      </div>
+      <div class="work-card-shine"></div>
+    </div>
+    <div class="work-card panel wc6 panel-lift border-g rv" style="transition-delay:.40s">
+      <div class="work-card-bg"></div>
+      <img class="work-card-photo" src="posters/image (1).png" alt="Graphic Design — VOID SERIES Print Campaign" loading="lazy">
+      <div class="work-card-dim"></div>
+      <div class="work-card-wm">GFX</div>
+      <div class="work-card-content">
+        <div class="work-cat neon-g">Graphic Design</div>
+        <div class="work-name">VOID SERIES<br>Print Campaign</div>
+        <div class="work-sub">Editorial photography + layout direction</div>
+      </div>
+      <div class="work-card-shine"></div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+<!-- ════════════════════════════════════════
+     ██ 01A — ABOUT & SKILLS
+════════════════════════════════════════ -->
+<section class="sec" id="about" style="background:rgba(4,6,14,0.4)">
+  <div class="rv">
+    <p class="sec-tag tg">01A — About & Skills</p>
+    <h2 class="sec-h">Creative <span class="neon-b">Professional</span></h2>
+    <p class="sec-sub">Ted.Ke — Creative Director at HXZE. Expertise in graphic design, web design, clothing design, and network architecture. Powered by ArkTech.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:60px;align-items:start;margin-top:60px;">
+    <!-- About Text -->
+    <div class="rv-l">
+      <h3 style="font-size:clamp(20px,2.5vw,30px);font-weight:900;margin-bottom:20px;text-transform:uppercase;letter-spacing:.05em;">Professional Overview</h3>
+      <p style="font-size:.88rem;line-height:1.9;color:var(--text-m);margin-bottom:16px;">I'm Ted.Ke, Creative Director at HXZE — a multidisciplinary designer and technologist with deep expertise in graphic design, web design, clothing design, and network architecture. I create visual identities, responsive digital experiences, and design systems that define culture.</p>
+      <p style="font-size:.88rem;line-height:1.9;color:var(--text-m);margin-bottom:16px;">With expertise in modern design tools, web technologies, and emerging platforms, I deliver high-quality visuals and functional digital experiences that help brands stand out globally. From stunning graphics and logos to complete brand identities, clothing collections, and infrastructure systems.</p>
+      <p style="font-size:.88rem;line-height:1.9;color:var(--text-m);margin-bottom:32px;"><strong>HXZE is powered by ArkTech — combining creative vision with intelligent systems.</strong></p>
+
+      <h3 style="font-size:clamp(18px,2.2vw,24px);font-weight:700;margin-bottom:20px;">Design Tools & Software</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:40px;">
+        <div class="skill-badge panel border-g">Photoshop</div>
+        <div class="skill-badge panel border-b">Illustrator</div>
+        <div class="skill-badge panel border-p">InDesign</div>
+        <div class="skill-badge panel border-g">Figma</div>
+        <div class="skill-badge panel border-b">Adobe XD</div>
+        <div class="skill-badge panel border-o">Sketch</div>
+        <div class="skill-badge panel border-p">HTML/CSS</div>
+        <div class="skill-badge panel border-g">JavaScript</div>
+        <div class="skill-badge panel border-b">Three.js</div>
+      </div>
+
+      <h3 style="font-size:clamp(18px,2.2vw,24px);font-weight:700;margin-bottom:20px;">Expertise Areas</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;">
+        <div class="skill-badge panel border-o">Brand Strategy</div>
+        <div class="skill-badge panel border-p">Fashion Design</div>
+        <div class="skill-badge panel border-b">UI/UX Design</div>
+        <div class="skill-badge panel border-g">Motion Design</div>
+        <div class="skill-badge panel border-p">Art Direction</div>
+        <div class="skill-badge panel border-o">Network Design</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:32px;">
+        <div style="text-align:center;padding:14px 10px;background:var(--glass-lt);border:1px solid var(--edge);border-radius:var(--r-sm);">
+          <div style="font-weight:900;font-size:1.4rem;color:var(--text);line-height:1;">200+</div>
+          <div style="font-family:var(--mono);font-size:.5rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-d);margin-top:4px;">Projects</div>
+        </div>
+        <div style="text-align:center;padding:14px 10px;background:var(--glass-lt);border:1px solid var(--edge);border-radius:var(--r-sm);">
+          <div style="font-weight:900;font-size:1.4rem;color:var(--text);line-height:1;">48</div>
+          <div style="font-family:var(--mono);font-size:.5rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-d);margin-top:4px;">Websites</div>
+        </div>
+        <div style="text-align:center;padding:14px 10px;background:var(--glass-lt);border:1px solid var(--edge);border-radius:var(--r-sm);">
+          <div style="font-weight:900;font-size:1.4rem;color:var(--text);line-height:1;">98%</div>
+          <div style="font-family:var(--mono);font-size:.5rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-d);margin-top:4px;">Satisfaction</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="rv-r">
+      <div class="panel" style="overflow:hidden;border-radius:var(--r-lg);">
+        <div style="width:100%;aspect-ratio:1;position:relative;overflow:hidden;">
+          <img src="posters/6261.JPG" alt="Ted.Ke Creative Director HXZE & ArkTech" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform .6s ease;">
+          <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.8) 0%,transparent 60%);"></div>
+        </div>
+        <div style="padding:24px;">
+          <div style="font-weight:900;font-size:1.3rem;letter-spacing:.04em;margin-bottom:4px;">Ted.Ke</div>
+          <div style="font-family:var(--mono);font-size:.55rem;letter-spacing:.25em;text-transform:uppercase;color:var(--neon-b);margin-bottom:8px;font-weight:700;">Creative Director</div>
+          <div style="font-family:var(--mono);font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-g);margin-bottom:14px;">HXZE & ArkTech</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+            <span style="font-family:var(--mono);font-size:.52rem;letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;border-radius:var(--r-pill);background:rgba(0,180,255,0.08);border:1px solid rgba(0,180,255,0.2);color:var(--neon-b);">Design</span>
+            <span style="font-family:var(--mono);font-size:.52rem;letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;border-radius:var(--r-pill);background:rgba(0,180,255,0.08);border:1px solid rgba(0,180,255,0.2);color:var(--neon-b);">Web</span>
+            <span style="font-family:var(--mono);font-size:.52rem;letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;border-radius:var(--r-pill);background:rgba(0,180,255,0.08);border:1px solid rgba(0,180,255,0.2);color:var(--neon-b);">Innovation</span>
+            <span style="font-family:var(--mono);font-size:.52rem;letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;border-radius:var(--r-pill);background:rgba(255,106,0,0.08);border:1px solid rgba(255,106,0,0.2);color:var(--neon-o);">ArkTech</span>
+          </div>
+          <div style="font-size:.7rem;color:var(--text-d);line-height:1.5;border-top:1px solid var(--edge);padding-top:12px;margin-top:12px;">
+            <strong>Founder & Creative Director</strong> at HXZE Studio and ArkTech. Transforming creative vision into intelligent systems.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     ██ 01B — PORTFOLIO & WORK
+════════════════════════════════════════ -->
+<section class="sec" id="portfolio">
+  <div class="rv">
+    <p class="sec-tag tp">01B — Portfolio & Work</p>
+    <h2 class="sec-h">Recent <span class="neon-g">Projects</span></h2>
+    <p class="sec-sub">Explore latest work across graphic design, logos, posters, web design and clothing concepts. Every piece built with intention and precision.</p>
+  </div>
+
+  <!-- Portfolio Tabs -->
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:36px;flex-wrap:wrap;">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="portfolio-tab-btn active" data-filter="all" style="padding:9px 22px;border-radius:var(--r-pill);border:1px solid var(--edge2);background:transparent;color:var(--text-m);font-weight:600;font-size:.65rem;font-family:var(--mono);letter-spacing:.12em;cursor:none;transition:all .3s;text-transform:uppercase;">All Work</button>
+      <button class="portfolio-tab-btn" data-filter="logos" style="padding:9px 22px;border-radius:var(--r-pill);border:1px solid var(--edge2);background:transparent;color:var(--text-m);font-weight:600;font-size:.65rem;font-family:var(--mono);letter-spacing:.12em;cursor:none;transition:all .3s;text-transform:uppercase;">Logos</button>
+      <button class="portfolio-tab-btn" data-filter="posters" style="padding:9px 22px;border-radius:var(--r-pill);border:1px solid var(--edge2);background:transparent;color:var(--text-m);font-weight:600;font-size:.65rem;font-family:var(--mono);letter-spacing:.12em;cursor:none;transition:all .3s;text-transform:uppercase;">Posters</button>
+      <button class="portfolio-tab-btn" data-filter="WishCards" style="padding:9px 22px;border-radius:var(--r-pill);border:1px solid var(--edge2);background:transparent;color:var(--text-m);font-weight:600;font-size:.65rem;font-family:var(--mono);letter-spacing:.12em;cursor:none;transition:all .3s;text-transform:uppercase;">Wish Cards</button>
+      <button class="portfolio-tab-btn" data-filter="Business cards" style="padding:9px 22px;border-radius:var(--r-pill);border:1px solid var(--edge2);background:transparent;color:var(--text-m);font-weight:600;font-size:.65rem;font-family:var(--mono);letter-spacing:.12em;cursor:none;transition:all .3s;text-transform:uppercase;">Business Cards</button>
+      <button class="portfolio-tab-btn" data-filter="web" style="padding:9px 22px;border-radius:var(--r-pill);border:1px solid var(--edge2);background:transparent;color:var(--text-m);font-weight:600;font-size:.65rem;font-family:var(--mono);letter-spacing:.12em;cursor:none;transition:all .3s;text-transform:uppercase;">Web Design</button>
+    </div>
+  </div>
+
+  <!-- Portfolio Grid -->
+  <div id="portfolioGrid" class="portfolio-grid" style="columns:4 200px;column-gap:16px;margin-bottom:60px;">
+    <!-- Logos -->
+    <div class="portfolio-item rv" data-category="logos" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="logos/WhatsApp Image 2026-04-05 at 19.50.48 (1).jpeg" alt="Logo Design 1" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-pk);">Logo Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Brand Identity 01</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="logos" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="logos/WhatsApp Image 2026-04-05 at 19.50.48 (2).jpeg" alt="Logo Design 2" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-pk);">Logo Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Brand Identity 02</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="logos" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="logos/WhatsApp Image 2026-04-05 at 19.50.48 (3).jpeg" alt="Logo Design 3" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-pk);">Logo Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Brand Identity 03</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="logos" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="logos/WhatsApp Image 2026-04-05 at 19.50.49 (1).jpeg" alt="Logo Design 4" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-pk);">Logo Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Brand Identity 04</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="logos" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="logos/WhatsApp Image 2026-04-05 at 19.50.49 (2).jpeg" alt="Logo Design 5" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-pk);">Logo Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Brand Identity 05</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="logos" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="logos/WhatsApp Image 2026-04-05 at 19.50.49 (3).jpeg" alt="Logo Design 6" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-pk);">Logo Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Brand Identity 06</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="logos" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="logos/Screenshot from 2026-04-05 19-47-14.png" alt="Logo Design 7" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-pk);">Logo Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Brand Identity 07</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="logos" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="logos/Screenshot from 2026-04-05 19-48-14.png" alt="Logo Design 8" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-pk);">Logo Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Brand Identity 08</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="logos" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="logos/WhatsApp Image 2026-04-05 at 20.04.11 (1).jpeg" alt="Logo Design 9" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-pk);">Logo Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Brand Identity 09</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="logos" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="logos/WhatsApp Image 2026-04-05 at 20.06.50.jpeg" alt="Logo Design 10" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-pk);">Logo Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Brand Identity 10</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="logos" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="logos/WhatsApp Image 2026-04-05 at 19.50.49.jpeg" alt="Logo Design 11" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-pk);">Logo Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Brand Identity 11</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="logos" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="logos/ARKTECH.png" alt="ARKTECH Logo" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-pk);">Logo Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">ARKTECH Identity</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="logos" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="1%20james.png" alt="Diani Beach Logo Concept" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-pk);">Logo Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Diani Beach Concept</div></div>
+      </div>
+    </div>
+
+     <!-- Wish Cards -->
+    <div class="portfolio-item rv" data-category="WishCards" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="wishcards/1%20james.png" alt="Wish Card — James" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-p);">Wish Card</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">James Edition</div></div>
+      </div>
+    </div>
+     <!-- Business cards -->
+     <div class="portfolio-item rv" data-category="Business cards" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="Bscards/EVE.jpeg" alt="Business Card Design" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-b);">Business Card</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Evelyne Kagendo</div></div>
+      </div>
+    </div>
+    <!-- Posters -->
+    <div class="portfolio-item rv" data-category="posters" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="posters/1.jpeg" alt="Poster Design 1" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-b);">Poster Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Campaign 01</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="posters" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="posters/WhatsApp Image 2026-03-31 at 15.10.37 (1).jpeg" alt="Poster Design 2" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-b);">Poster Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Campaign 02</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="posters" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="posters/WhatsApp Image 2026-03-31 at 15.10.37.jpeg" alt="Poster Design 3" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-b);">Poster Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Campaign 03</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="posters" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="posters/WhatsApp Image 2026-04-05 at 19.50.45.jpeg" alt="Poster Design 4" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-b);">Poster Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Campaign 04</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="posters" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="posters/WhatsApp Image 2026-04-05 at 19.50.48.jpeg" alt="Poster Design 5" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-b);">Poster Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Campaign 05</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="posters" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="posters/image (1).png" alt="Poster Design 6" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-b);">Poster Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Campaign 06</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="posters" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="posters/image (2).png" alt="Poster Design 7" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-b);">Poster Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Campaign 07</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="posters" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="posters/ChatGPT Image Apr 6, 2026, 12_09_58 PM.png" alt="Poster Design 8" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-b);">Poster Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Campaign 08</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="posters" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="posters/ChatGPT Image Apr 6, 2026, 12_10_03 PM.png" alt="Poster Design 9" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-b);">Poster Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Campaign 09</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="posters" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="posters/ChatGPT Image Apr 6, 2026, 12_10_09 PM.png" alt="Poster Design 10" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-b);">Poster Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Campaign 10</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="posters" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="posters/ChatGPT Image Apr 6, 2026, 12_20_07 PM.png" alt="Poster Design 11" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-b);">Poster Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Campaign 11</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="posters" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="posters/WhatsApp Product 2026-04-05 at 19.59.56.jpeg" alt="Poster Design 12" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-b);">Poster Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Campaign 12</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="posters" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="posters/WhatsApp Image 2026-04-05 at 20.10.17.jpeg" alt="Poster Design 13" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-b);">Poster Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Campaign 13</div></div>
+      </div>
+    </div>
+
+    <!-- Web Design -->
+    <div class="portfolio-item rv" data-category="web" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="web/plusna.png" alt="Web Design Landing Page" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-g);">Web Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Landing Page 01</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="web" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="web/maison.png" alt="Web Design — Maison" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-g);">Web Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Maison E-Commerce</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="web" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="web/meridian.png" alt="Web Design — Meridian" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-g);">Web Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Meridian Platform</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="web" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="web/nexus.png" alt="Web Design — Nexus" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-g);">Web Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Nexus Portal</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="web" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="web/Savanna.OS.png" alt="Web Design — Savanna OS" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-g);">Web Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Savanna OS</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="WishCards" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="wishcards/moses%202.png" alt="Wish Card — Moses" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-p);">Wish Card</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Moses Edition</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="web" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="web/velour.png" alt="Web Design — Velour" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-g);">Web Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Velour Studio</div></div>
+      </div>
+    </div>
+    <div class="portfolio-item rv" data-category="web" style="break-inside:avoid;margin-bottom:16px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--edge2);transition:all .4s;cursor:none;position:relative;">
+      <img src="web/webforge.png" alt="Web Design — Webforge" style="width:100%;height:auto;display:block;transition:transform .5s ease;" loading="lazy">
+      <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.85) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:16px;">
+        <div><div style="font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--neon-g);">Web Design</div><div style="font-weight:700;font-size:.88rem;color:var(--text);margin-top:2px;">Webforge App</div></div>
+      </div>
+    </div>
+  </div>
+ 
+  <div class="portfolio-footer">
+    <button id="portfolio-toggle-btn" class="btn-neon btn-neon-b portfolio-toggle-btn" style="display:none;">Show more work</button>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     ██ 01C — BUILT BY HXZE (SKILL SHOWCASE)
+════════════════════════════════════════ -->
+<section class="sec" id="built-by" style="background:rgba(191,0,255,0.03)">
+<style>
+/* ── BUILT BY HXZE styles ── */
+.bbh-hero{width:100%;height:clamp(320px,42vw,560px);object-fit:cover;border-radius:var(--r-lg);border:1px solid var(--edge2);display:block;margin-top:52px;box-shadow:0 40px 100px rgba(0,0,0,0.8),0 0 80px rgba(191,0,255,0.1);transition:transform .6s ease;}
+.bbh-hero:hover{transform:scale(1.01);}
+.bbh-feat{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:14px;}
+.bbh-feat-right{display:grid;grid-template-rows:1fr 1fr;gap:14px;}
+.bbh-wrap{position:relative;border-radius:var(--r-lg);overflow:hidden;cursor:none;}
+.bbh-wrap img{width:100%;height:100%;min-height:180px;object-fit:cover;display:block;transition:transform .55s ease;}
+.bbh-wrap:hover img{transform:scale(1.05);}
+.bbh-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(2,4,8,0.9) 0%,transparent 55%);opacity:0;transition:opacity .3s;display:flex;align-items:flex-end;padding:18px;}
+.bbh-wrap:hover .bbh-overlay{opacity:1;}
+.bbh-border{position:absolute;inset:0;border:1px solid rgba(255,255,255,0.09);border-radius:var(--r-lg);transition:border-color .3s;}
+.bbh-wrap:hover .bbh-border{border-color:rgba(191,0,255,0.5);}
+.bbh-tag{font-family:var(--mono);font-size:.52rem;letter-spacing:.25em;text-transform:uppercase;color:var(--neon-p);}
+.bbh-name{font-weight:700;font-size:.9rem;color:var(--text);margin-top:3px;}
+/* horizontal strip */
+.bbh-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:14px;}
+.bbh-strip-item{position:relative;border-radius:14px;overflow:hidden;aspect-ratio:.9;cursor:none;}
+.bbh-strip-item img{width:100%;height:100%;object-fit:cover;transition:transform .5s,filter .4s;}
+.bbh-strip-item:hover img{transform:scale(1.08);filter:brightness(1.1);}
+.bbh-strip-border{position:absolute;inset:0;border:1px solid rgba(255,255,255,0.07);border-radius:14px;transition:border-color .3s;}
+.bbh-strip-item:hover .bbh-strip-border{border-color:rgba(191,0,255,0.5);}
+/* text-image rows */
+.bbh-row{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:center;margin-top:80px;}
+.bbh-row.rev{direction:rtl;} .bbh-row.rev>*{direction:ltr;}
+.bbh-row-img{border-radius:var(--r-lg);overflow:hidden;}
+.bbh-row-img img{width:100%;height:clamp(240px,28vw,380px);object-fit:cover;display:block;transition:transform .55s ease;}
+.bbh-row-img:hover img{transform:scale(1.04);}
+.bbh-row-tag{font-family:var(--mono);font-size:.54rem;letter-spacing:.3em;text-transform:uppercase;color:var(--neon-p);margin-bottom:12px;}
+.bbh-row-h{font-weight:900;font-size:clamp(20px,2.6vw,36px);line-height:1.05;margin-bottom:14px;}
+.bbh-row-p{font-size:.82rem;font-weight:200;line-height:1.9;color:var(--text-m);margin-bottom:18px;}
+.bbh-badges{display:flex;gap:7px;flex-wrap:wrap;}
+.bbh-badge{font-family:var(--mono);font-size:.5rem;letter-spacing:.12em;text-transform:uppercase;padding:4px 11px;border-radius:999px;background:rgba(191,0,255,0.08);border:1px solid rgba(191,0,255,0.22);color:var(--neon-p);}
+/* discipline cards */
+.bbh-disc{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:60px;}
+.bbh-disc-card{border-radius:var(--r-lg);overflow:hidden;cursor:none;position:relative;transition:transform .35s cubic-bezier(.16,1,.3,1);}
+.bbh-disc-card:hover{transform:translateY(-8px);}
+.bbh-disc-img{width:100%;height:200px;object-fit:cover;display:block;transition:transform .55s;}
+.bbh-disc-card:hover .bbh-disc-img{transform:scale(1.06);}
+.bbh-disc-body{padding:18px 20px;background:rgba(8,13,26,0.92);backdrop-filter:blur(12px);}
+.bbh-disc-label{font-family:var(--mono);font-size:.52rem;letter-spacing:.22em;text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+.bbh-disc-desc{font-size:.76rem;color:var(--text-m);line-height:1.6;}
+.bbh-disc-border{position:absolute;inset:0;border:1px solid rgba(255,255,255,0.08);border-radius:var(--r-lg);transition:border-color .3s,box-shadow .3s;}
+.bbh-disc-card:hover .bbh-disc-border{border-color:rgba(191,0,255,0.45);box-shadow:0 20px 60px rgba(0,0,0,0.6),0 0 40px rgba(191,0,255,0.1);}
+@media(max-width:1100px){.bbh-disc{grid-template-columns:1fr 1fr;} .bbh-strip{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:900px){.bbh-feat,.bbh-row{grid-template-columns:1fr;} .bbh-row.rev{direction:ltr;} .bbh-strip{grid-template-columns:repeat(2,1fr);} .bbh-disc{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.bbh-disc{grid-template-columns:1fr;}}
+</style>
+
+  <div class="rv">
+    <p class="sec-tag tp">01C — Built By HXZE</p>
+    <h2 class="sec-h">Design <span class="neon-p">Excellence</span></h2>
+    <p class="sec-sub">Every project crafted with precision. Powered by <span class="neon-o">ArkTech</span> — connecting creative vision with intelligent systems.</p>
+  </div>
+
+  <!-- CINEMATIC HERO IMAGE -->
+  <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1600&q=88" alt="Creative workspace with UI design screens" class="bbh-hero rv" loading="lazy">
+
+  <!-- FEATURED 2-COL GRID — local real work -->
+ 
+  <!-- LOGO WORK STRIP — real assets -->
+  
+  <!-- TEXT × IMAGE ROW 1 — Logo work -->
+  <div class="bbh-row rv">
+    <div class="bbh-row-img">
+      <img src="logos/WhatsApp Image 2026-04-05 at 19.50.49 (3).jpeg" alt="HXZE Logo Design" loading="lazy">
+    </div>
+    <div>
+      <div class="bbh-row-tag">Logo & Identity</div>
+      <h3 class="bbh-row-h">150+ Logos.<br>Zero Compromise.</h3>
+      <p class="bbh-row-p">Every mark is rooted in strategy and executed with precision. From bold wordmarks to abstract symbols — built to own their space at any scale and define the brand that carries them.</p>
+      <div class="bbh-badges">
+        <span class="bbh-badge">Illustrator</span>
+        <span class="bbh-badge">Photoshop</span>
+        <span class="bbh-badge">Figma</span>
+        <span class="bbh-badge">CorelDraw</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEXT × IMAGE ROW 2 reversed — Web work -->
+  <div class="bbh-row rev rv">
+    <div class="bbh-row-img">
+      <img src="https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&q=82" alt="HXZE Web Design" loading="lazy">
+    </div>
+    <div>
+      <div class="bbh-row-tag" style="color:var(--neon-b);">Web Design</div>
+      <h3 class="bbh-row-h">48 Sites.<br><span style="color:var(--neon-b)">Delivered.</span></h3>
+      <p class="bbh-row-p">From high-converting landing pages to full e-commerce ecosystems — every HXZE site is fast, responsive, and visually powerful. Glass UI systems, 3D elements, and motion that sets clients apart.</p>
+      <div class="bbh-badges">
+        <span class="bbh-badge" style="background:rgba(0,180,255,0.08);border-color:rgba(0,180,255,0.25);color:var(--neon-b);">HTML/CSS</span>
+        <span class="bbh-badge" style="background:rgba(0,180,255,0.08);border-color:rgba(0,180,255,0.25);color:var(--neon-b);">JavaScript</span>
+        <span class="bbh-badge" style="background:rgba(0,180,255,0.08);border-color:rgba(0,180,255,0.25);color:var(--neon-b);">Three.js</span>
+        <span class="bbh-badge" style="background:rgba(0,180,255,0.08);border-color:rgba(0,180,255,0.25);color:var(--neon-b);">Figma</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- POSTER STRIP — real work -->
+  <div class="rv" style="margin-top:60px;">
+    <p style="font-family:var(--mono);font-size:.54rem;letter-spacing:.35em;text-transform:uppercase;color:var(--neon-o);margin-bottom:18px;">— Poster & Visual Campaigns —</p>
+    <div class="poster-strip-shell">
+      <button class="poster-scroll-btn" data-direction="-1" aria-label="Scroll posters left">&#8249;</button>
+      <div class="poster-strip" id="posterStrip">
+        <div class="poster-strip-item"><img src="posters/1.jpeg" alt="Poster" loading="lazy"></div>
+        <div class="poster-strip-item"><img src="posters/WhatsApp Image 2026-03-31 at 15.10.37 (1).jpeg" alt="Poster" loading="lazy"></div>
+        <div class="poster-strip-item"><img src="posters/WhatsApp Image 2026-04-05 at 19.50.45.jpeg" alt="Poster" loading="lazy"></div>
+        <div class="poster-strip-item"><img src="posters/WhatsApp Image 2026-04-05 at 19.50.48.jpeg" alt="Poster" loading="lazy"></div>
+        <div class="poster-strip-item"><img src="posters/image (1).png" alt="Poster" loading="lazy"></div>
+        <div class="poster-strip-item"><img src="posters/image (2).png" alt="Poster" loading="lazy"></div>
+        <div class="poster-strip-item"><img src="posters/image (3).png" alt="Poster" loading="lazy"></div>
+        <div class="poster-strip-item"><img src="posters/image (4).png" alt="Poster" loading="lazy"></div>
+      </div>
+      <button class="poster-scroll-btn" data-direction="1" aria-label="Scroll posters right">&#8250;</button>
+    </div>
+  </div>
+
+  <!-- 4 DISCIPLINE CARDS with Unsplash -->
+  <div class="bbh-disc rv">
+    <div class="bbh-disc-card">
+      <img src="https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&q=82" alt="Graphic Design" class="bbh-disc-img" loading="lazy">
+      <div class="bbh-disc-body">
+        <div class="bbh-disc-label" style="color:var(--neon-g);">Graphic Design</div>
+        <p class="bbh-disc-desc">Brand identities, logos, print design, and visual systems that define culture.</p>
+      </div>
+      <div class="bbh-disc-border" style="border-color:rgba(0,255,136,0.15);"></div>
+    </div>
+    <div class="bbh-disc-card">
+      <img src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=600&q=82" alt="Web Design" class="bbh-disc-img" loading="lazy">
+      <div class="bbh-disc-body">
+        <div class="bbh-disc-label" style="color:var(--neon-b);">Web Design</div>
+        <p class="bbh-disc-desc">Glass UI, responsive builds, e-commerce, and full-stack web experiences.</p>
+      </div>
+      <div class="bbh-disc-border" style="border-color:rgba(0,180,255,0.15);"></div>
+    </div>
+    <div class="bbh-disc-card">
+      <img src="https://images.unsplash.com/photo-1521334884684-d80222895322?w=600&q=82" alt="Clothing Design" class="bbh-disc-img" loading="lazy">
+      <div class="bbh-disc-body">
+        <div class="bbh-disc-label" style="color:var(--neon-p);">Clothing Design</div>
+        <p class="bbh-disc-desc">Apparel collections, textile graphics, lookbooks, and garment tech-packs.</p>
+      </div>
+      <div class="bbh-disc-border" style="border-color:rgba(191,0,255,0.15);"></div>
+    </div>
+    <div class="bbh-disc-card">
+      <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=82" alt="Network Design" class="bbh-disc-img" loading="lazy">
+      <div class="bbh-disc-body">
+        <div class="bbh-disc-label" style="color:var(--neon-o);">Network & IT</div>
+        <p class="bbh-disc-desc">Infrastructure architecture, topology maps, and enterprise system design.</p>
+      </div>
+      <div class="bbh-disc-border" style="border-color:rgba(255,106,0,0.15);"></div>
+    </div>
+  </div>
+
+  <!-- ArkTech acknowledgement -->
+  <div class="panel rv" style="margin-top:60px;padding:28px;background:linear-gradient(135deg,rgba(255,106,0,0.05) 0%,rgba(191,0,255,0.05) 100%);border:1px solid rgba(255,106,0,0.1);border-radius:var(--r-lg);text-align:center;">
+    <p style="font-size:.85rem;color:var(--text-m);margin-bottom:12px;"><strong>This website is powered by <span class="neon-o">ArkTech</span></strong></p>
+    <p style="font-size:.75rem;color:var(--text-d);font-family:var(--mono);letter-spacing:.08em;">Connecting creative vision with intelligent systems • Founded & Designed by Ted.Ke</p>
+  </div>
+</section>
+
+<section class="sec" id="dashboard">
+  <div class="rv">
+    <p class="sec-tag tb">02 — Dashboard</p>
+    <h2 class="sec-h">AI <span class="neon-b">Control</span> Panel</h2>
+    <p class="sec-sub">Studio intelligence at a glance. Monitor projects, client status, revenue and system health in one layered interface.</p>
+  </div>
+
+  <div class="dash-wrap rv">
+    <!-- Sidebar -->
+    <div class="dash-sb panel">
+      <div class="dsb-logo"><div class="logo-icon">HX</div>HXZE</div>
+
+      <div class="dsb-section-label">Main</div>
+      <div class="dsb-item act"><div class="dsb-i-wrap">⬡</div> Overview</div>
+      <div class="dsb-item"><div class="dsb-i-wrap">◈</div> Analytics <div class="dsb-badge">3</div></div>
+      <div class="dsb-item"><div class="dsb-i-wrap">◻</div> Projects</div>
+      <div class="dsb-item"><div class="dsb-i-wrap">✦</div> Clients</div>
+
+      <div class="dsb-section-label">Studio</div>
+      <div class="dsb-item"><div class="dsb-i-wrap">⊕</div> Graphic <div class="dsb-badge rose">2</div></div>
+      <div class="dsb-item"><div class="dsb-i-wrap">≋</div> Web</div>
+      <div class="dsb-item"><div class="dsb-i-wrap">◎</div> Apparel</div>
+      <div class="dsb-item"><div class="dsb-i-wrap">⚙</div> Network</div>
+
+      <div class="dsb-sep"></div>
+      <div class="dsb-item"><div class="dsb-i-wrap">?</div> Settings</div>
+
+      <div class="dsb-spacer"></div>
+      <div class="dsb-user">
+        <div class="dsb-av">H</div>
+        <div>
+          <div class="dsb-user-n">HXZE Studio</div>
+          <div class="dsb-user-r">PRO_TIER // ACTIVE</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div style="display:flex;flex-direction:column;gap:10px;overflow:hidden">
+      <!-- Topbar -->
+      <div class="panel" style="padding:12px 18px;display:flex;align-items:center;gap:12px">
+        <div>
+          <div class="dash-tb-title">Good morning, HXZE 👋</div>
+          <div class="dash-tb-sub mono">SYS_STATUS: ALL_SYSTEMS_NOMINAL</div>
+        </div>
+        <input class="dash-search" type="text" placeholder="Search projects, clients...">
+        <div class="dash-icon-btn notif">🔔</div>
+        <div class="dash-icon-btn">⚙</div>
+        <div class="dsb-av" style="border:2px solid rgba(0,180,255,0.3)">H</div>
+      </div>
+
+      <!-- KPI + AI grid -->
+      <div class="dash-grid" style="flex:1;overflow:hidden">
+        <!-- KPIs -->
+        <div class="kpi panel panel-lift border-g">
+          <div class="kpi-head"><div class="kpi-ic bg">⬡</div><div class="kpi-delta up">↑ 18%</div></div>
+          <div class="kpi-v">48</div>
+          <div class="kpi-l">Sites Live</div>
+        </div>
+        <div class="kpi panel panel-lift border-b">
+          <div class="kpi-head"><div class="kpi-ic bb">◈</div><div class="kpi-delta up">↑ 24%</div></div>
+          <div class="kpi-v">$12.4K</div>
+          <div class="kpi-l">Monthly Rev.</div>
+        </div>
+        <div class="kpi panel panel-lift border-p">
+          <div class="kpi-head"><div class="kpi-ic bp">✦</div><div class="kpi-delta up">↑ 8%</div></div>
+          <div class="kpi-v">24</div>
+          <div class="kpi-l">Active Clients</div>
+        </div>
+        <div class="kpi panel panel-lift border-o">
+          <div class="kpi-head"><div class="kpi-ic bo">≋</div><div class="kpi-delta dn">↓ 2%</div></div>
+          <div class="kpi-v">98%</div>
+          <div class="kpi-l">Satisfaction</div>
+        </div>
+
+        <!-- AI Control -->
+        <div class="ai-ctrl panel border-p">
+          <div>
+            <div class="ai-ctrl-title">System Intelligence</div>
+            <div class="ai-ctrl-sub mono" style="font-size:.52rem;letter-spacing:.1em;color:var(--text-d)">HXZE_AI v2.6</div>
+          </div>
+          <div class="ai-metric">
+            <div class="ai-m-top"><span class="ai-m-name">Design Output</span><span class="ai-m-val">94%</span></div>
+            <div class="ai-track"><div class="ai-fill f-g" style="width:94%"></div></div>
+          </div>
+          <div class="ai-metric">
+            <div class="ai-m-top"><span class="ai-m-name">Client Health</span><span class="ai-m-val">89%</span></div>
+            <div class="ai-track"><div class="ai-fill f-b" style="width:89%;animation-delay:.2s"></div></div>
+          </div>
+          <div class="ai-metric">
+            <div class="ai-m-top"><span class="ai-m-name">Pipeline Flow</span><span class="ai-m-val">76%</span></div>
+            <div class="ai-track"><div class="ai-fill f-p" style="width:76%;animation-delay:.4s"></div></div>
+          </div>
+          <div class="ai-metric">
+            <div class="ai-m-top"><span class="ai-m-name">Revenue Rate</span><span class="ai-m-val">82%</span></div>
+            <div class="ai-track"><div class="ai-fill f-o" style="width:82%;animation-delay:.6s"></div></div>
+          </div>
+          <div class="ai-sys-status">
+            <div class="sys-dot-row"><div class="sys-dot"></div><div class="sys-txt">All Systems Nominal</div></div>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="dash-chart panel">
+          <div class="chart-head">
+            <div class="chart-title">Revenue — Last 7 Days</div>
+            <div class="chart-tabs">
+              <div class="chart-tab a">7D</div>
+              <div class="chart-tab">30D</div>
+              <div class="chart-tab">90D</div>
+            </div>
+          </div>
+          <div class="bars-area">
+            <div class="bar-col"><div class="bar-wrap"><div class="bar-inner" style="height:52%"></div></div><div class="bar-lbl">Mon</div></div>
+            <div class="bar-col"><div class="bar-wrap"><div class="bar-inner" style="height:68%;animation-delay:.1s"></div></div><div class="bar-lbl">Tue</div></div>
+            <div class="bar-col"><div class="bar-wrap"><div class="bar-inner" style="height:58%;animation-delay:.2s"></div></div><div class="bar-lbl">Wed</div></div>
+            <div class="bar-col"><div class="bar-wrap"><div class="bar-inner" style="height:85%;animation-delay:.3s"></div></div><div class="bar-lbl">Thu</div></div>
+            <div class="bar-col"><div class="bar-wrap"><div class="bar-inner hi" style="height:96%;animation-delay:.4s"></div></div><div class="bar-lbl">Fri</div></div>
+            <div class="bar-col"><div class="bar-wrap"><div class="bar-inner" style="height:75%;animation-delay:.5s"></div></div><div class="bar-lbl">Sat</div></div>
+            <div class="bar-col"><div class="bar-wrap"><div class="bar-inner" style="height:80%;animation-delay:.6s"></div></div><div class="bar-lbl">Sun</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     ██ 03 — ANALYTICS
+════════════════════════════════════════ -->
+<section class="sec" id="analytics">
+  <div class="rv">
+    <p class="sec-tag tg">03 — Analytics</p>
+    <h2 class="sec-h">Charts &amp; <span class="neon-g">Insights</span></h2>
+    <p class="sec-sub">Every metric, rendered beautifully. Understand your studio's performance across all four disciplines.</p>
+  </div>
+
+  <div class="an-grid">
+    <!-- Donut -->
+    <div class="an-card panel panel-lift rv">
+      <div class="an-head"><div class="an-title">Service Split</div><div class="tag-pill tg-g">Live</div></div>
+      <div class="donut-wrap" style="position:relative">
+        <div style="position:relative;width:90px;height:90px;flex-shrink:0">
+          <svg class="donut-svg" viewBox="0 0 100 100">
+            <circle class="donut-track" cx="50" cy="50" r="40"/>
+            <circle class="donut-seg" cx="50" cy="50" r="40" stroke="url(#lg1)" style="stroke-dashoffset:60"/>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.95rem;color:var(--text)">76%</div>
+        </div>
+        <div class="donut-legend">
+          <div class="dl-row"><div class="dl-dot" style="background:var(--neon-g)"></div>Web Design — 40%</div>
+          <div class="dl-row"><div class="dl-dot" style="background:var(--neon-b)"></div>Graphic — 36%</div>
+          <div class="dl-row"><div class="dl-dot" style="background:var(--neon-p)"></div>Clothing — 14%</div>
+          <div class="dl-row"><div class="dl-dot" style="background:var(--neon-o)"></div>Network — 10%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Line chart -->
+    <div class="an-card w2 panel panel-lift rv" style="transition-delay:.08s">
+      <div class="an-head"><div class="an-title">Revenue &amp; Projects — 30 Days</div><div class="tag-pill tg-b">Realtime</div></div>
+      <div class="line-chart-wrap">
+        <svg viewBox="0 0 400 100" preserveAspectRatio="none">
+          <line class="lc-grid" x1="0" y1="25" x2="400" y2="25"/><line class="lc-grid" x1="0" y1="50" x2="400" y2="50"/><line class="lc-grid" x1="0" y1="75" x2="400" y2="75"/>
+          <path class="lc-area" fill="url(#la1)" d="M0,80 L50,68 L100,72 L150,52 L200,58 L250,38 L300,42 L350,22 L400,25 L400,100 L0,100Z"/>
+          <path class="lc-area" fill="url(#la2)" d="M0,88 L50,82 L100,78 L150,74 L200,76 L250,62 L300,58 L350,52 L400,48 L400,100 L0,100Z"/>
+          <path class="lc-path" stroke="var(--neon-b)" d="M0,80 L50,68 L100,72 L150,52 L200,58 L250,38 L300,42 L350,22 L400,25"/>
+          <path class="lc-path" stroke="var(--neon-g)" d="M0,88 L50,82 L100,78 L150,74 L200,76 L250,62 L300,58 L350,52 L400,48"/>
+          <circle cx="350" cy="22" r="4" fill="var(--neon-b)"/>
+          <circle cx="250" cy="62" r="4" fill="var(--neon-g)"/>
+        </svg>
+      </div>
+      <div class="stat-row">
+        <div class="stat-b"><div class="stat-bv">$48K</div><div class="stat-bl">Total Revenue</div><div class="stat-bd" style="color:var(--neon-g)">↑ 32.4%</div></div>
+        <div class="stat-b"><div class="stat-bv">86</div><div class="stat-bl">Projects Done</div><div class="stat-bd" style="color:var(--neon-g)">↑ 14.8%</div></div>
+        <div class="stat-b"><div class="stat-bv">4.9★</div><div class="stat-bl">Avg. Rating</div><div class="stat-bd" style="color:var(--neon-b)">→ Stable</div></div>
+      </div>
+    </div>
+
+    <!-- Second donut -->
+    <div class="an-card panel panel-lift rv" style="transition-delay:.12s">
+      <div class="an-head"><div class="an-title">Client Regions</div><div class="tag-pill tg-p">Global</div></div>
+      <div class="donut-wrap">
+        <div style="position:relative;width:90px;height:90px;flex-shrink:0">
+          <svg class="donut-svg" viewBox="0 0 100 100">
+            <circle class="donut-track" cx="50" cy="50" r="40"/>
+            <circle class="donut-seg" cx="50" cy="50" r="40" stroke="url(#lg2)" style="stroke-dashoffset:90;animation-delay:.3s"/>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.95rem;color:var(--text)">64%</div>
+        </div>
+        <div class="donut-legend">
+          <div class="dl-row"><div class="dl-dot" style="background:var(--neon-b)"></div>Africa — 64%</div>
+          <div class="dl-row"><div class="dl-dot" style="background:var(--neon-p)"></div>Europe — 22%</div>
+          <div class="dl-row"><div class="dl-dot" style="background:var(--neon-o)"></div>Americas — 14%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Global map -->
+    <div class="an-card w2 panel panel-lift rv" style="transition-delay:.16s">
+      <div class="an-head"><div class="an-title">Global Client Map</div><div class="tag-pill tg-o">Live Tracking</div></div>
+      <div class="map-box">
+        <div class="map-dots-bg"></div>
+        <div class="map-ping mp1" style="animation:mapPingPulse 2s ease-in-out infinite"></div>
+        <div class="map-ping mp2" style="animation:mapPingPulse 2s .8s ease-in-out infinite"></div>
+        <div class="map-ping mp3" style="animation:mapPingPulse 2s 1.4s ease-in-out infinite"></div>
+        <div class="map-ping mp4" style="animation:mapPingPulse 2s .4s ease-in-out infinite"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     ██ 04 — WIDGETS
+════════════════════════════════════════ -->
+<section class="sec" id="widgets" style="background:rgba(4,6,14,0.4)">
+  <div class="rv">
+    <p class="sec-tag tp">04 — Widgets</p>
+    <h2 class="sec-h">Modular <span class="neon-p">Cards</span></h2>
+    <p class="sec-sub">Snap any module into your workspace. Each widget is alive — animated, interactive, always current.</p>
+  </div>
+
+  <div class="widgets-grid">
+    <!-- Toggles -->
+    <div class="wg panel panel-lift border-b rv">
+      <div class="wg-head"><div class="wg-title">Studio Features</div><div class="wg-ic bb" style="background:rgba(0,180,255,0.12);color:var(--neon-b)">◈</div></div>
+      <div class="wg-toggle-list">
+        <div class="wg-toggle-row"><span class="wg-toggle-label">AI Design Assist</span><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="wg-toggle-row"><span class="wg-toggle-label">Client Portal</span><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="wg-toggle-row"><span class="wg-toggle-label">Auto-Invoicing</span><div class="sw" onclick="this.classList.toggle('on')"></div></div>
+        <div class="wg-toggle-row"><span class="wg-toggle-label">Cloud Backup</span><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="wg-toggle-row"><span class="wg-toggle-label">Dark Mode Export</span><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="wg panel panel-lift border-g rv" style="transition-delay:.08s">
+      <div class="wg-head"><div class="wg-title">Active Projects</div><div class="wg-ic bg" style="background:rgba(0,255,136,0.12);color:var(--neon-g)">⬡</div></div>
+      <div class="wg-prog-list">
+        <div class="wg-prog">
+          <div class="wg-prog-top"><span class="wg-prog-name">NOCTURNE Brand System</span><span class="wg-prog-pct">88%</span></div>
+          <div class="wg-prog-track"><div class="wg-prog-fill" style="width:88%;background:linear-gradient(90deg,var(--neon-g),rgba(0,255,136,0.3))"></div></div>
+        </div>
+        <div class="wg-prog">
+          <div class="wg-prog-top"><span class="wg-prog-name">HAZE E-commerce Site</span><span class="wg-prog-pct">64%</span></div>
+          <div class="wg-prog-track"><div class="wg-prog-fill" style="width:64%;animation-delay:.2s;background:linear-gradient(90deg,var(--neon-b),rgba(0,180,255,0.3))"></div></div>
+        </div>
+        <div class="wg-prog">
+          <div class="wg-prog-top"><span class="wg-prog-name">VLTGE Apparel Drop</span><span class="wg-prog-pct">42%</span></div>
+          <div class="wg-prog-track"><div class="wg-prog-fill" style="width:42%;animation-delay:.4s;background:linear-gradient(90deg,var(--neon-p),rgba(191,0,255,0.3))"></div></div>
+        </div>
+        <div class="wg-prog">
+          <div class="wg-prog-top"><span class="wg-prog-name">Enterprise Network Map</span><span class="wg-prog-pct">71%</span></div>
+          <div class="wg-prog-track"><div class="wg-prog-fill" style="width:71%;animation-delay:.6s;background:linear-gradient(90deg,var(--neon-o),rgba(255,106,0,0.3))"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Score -->
+    <div class="wg panel panel-lift border-g rv" style="transition-delay:.16s">
+      <div class="wg-head"><div class="wg-title">Studio Score</div><div class="wg-ic bg" style="background:rgba(0,255,136,0.12);color:var(--neon-g)">✦</div></div>
+      <div class="wg-score-center">
+        <div class="score-ring">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <circle fill="none" stroke="var(--edge2)" stroke-width="8" cx="50" cy="50" r="40" transform="rotate(-90 50 50)"/>
+            <circle fill="none" stroke="url(#lg1)" stroke-width="8" stroke-linecap="round" cx="50" cy="50" r="40" transform="rotate(-90 50 50)" stroke-dasharray="251" stroke-dashoffset="25" style="animation:donutDraw 1.5s cubic-bezier(.25,.46,.45,.94) .3s both"/>
+          </svg>
+          <div class="score-ring-val" id="scoreCount">--</div>
+        </div>
+        <div class="score-lbl">Performance Index</div>
+      </div>
+      <div class="score-bars">
+        <div class="score-mini"><div class="score-mini-val neon-g">99%</div><div class="score-mini-lbl" style="font-size:.54rem;color:var(--text-d)">Uptime</div></div>
+        <div class="score-mini"><div class="score-mini-val neon-b">&lt;2h</div><div class="score-mini-lbl" style="font-size:.54rem;color:var(--text-d)">Reply</div></div>
+        <div class="score-mini"><div class="score-mini-val neon-p">4.9★</div><div class="score-mini-lbl" style="font-size:.54rem;color:var(--text-d)">Rating</div></div>
+        <div class="score-mini"><div class="score-mini-val neon-o">$0</div><div class="score-mini-lbl" style="font-size:.54rem;color:var(--text-d)">Overdue</div></div>
+      </div>
+    </div>
+
+    <!-- Feed -->
+    <div class="wg panel panel-lift border-p rv" style="transition-delay:.24s">
+      <div class="wg-head"><div class="wg-title">Live Activity</div><div class="wg-ic bp" style="background:rgba(191,0,255,0.12);color:var(--neon-p)">⊕</div></div>
+      <div class="feed-list">
+        <div class="feed-item">
+          <div class="feed-av" style="background:linear-gradient(135deg,var(--neon-b),var(--neon-p))">N</div>
+          <div class="feed-text"><div class="f-n">Brand Kit Approved</div><div class="f-m">NOCTURNE — Final review passed</div></div>
+          <div class="feed-time">3m</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-av" style="background:linear-gradient(135deg,var(--neon-g),var(--neon-b))">H</div>
+          <div class="feed-text"><div class="f-n">Site Deployed</div><div class="f-m">HAZE e-com pushed to prod</div></div>
+          <div class="feed-time">18m</div>
+        </div>
+        <div class="feed-item">
+          <div class="feed-av" style="background:linear-gradient(135deg,var(--neon-p),var(--neon-o))">V</div>
+          <div class="feed-text"><div class="f-n">Collection Confirmed</div><div class="f-m">VLTGE Drop 3 — 12 pieces locked</div></div>
+          <div class="feed-time">1h</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sparkline -->
+    <div class="wg panel panel-lift border-o rv" style="transition-delay:.32s">
+      <div class="wg-head"><div class="wg-title">Enquiry Spike</div><div class="wg-ic bo" style="background:rgba(255,106,0,0.12);color:var(--neon-o)">≋</div></div>
+      <div class="spark-row">
+        <div class="sp-bar" style="height:28%"></div><div class="sp-bar" style="height:45%;animation-delay:.05s"></div>
+        <div class="sp-bar" style="height:38%;animation-delay:.1s"></div><div class="sp-bar hi" style="height:100%;animation-delay:.15s"></div>
+        <div class="sp-bar" style="height:78%;animation-delay:.2s"></div><div class="sp-bar" style="height:62%;animation-delay:.25s"></div>
+        <div class="sp-bar" style="height:55%;animation-delay:.3s"></div><div class="sp-bar hi" style="height:88%;animation-delay:.35s"></div>
+        <div class="sp-bar" style="height:70%;animation-delay:.4s"></div><div class="sp-bar" style="height:65%;animation-delay:.45s"></div>
+        <div class="sp-bar" style="height:74%;animation-delay:.5s"></div><div class="sp-bar" style="height:68%;animation-delay:.55s"></div>
+      </div>
+      <div class="sp-meta"><span>Peak: Fri 14:22</span><span style="color:var(--neon-o)">↑ 412% spike</span></div>
+    </div>
+
+    <!-- Clock -->
+    <div class="wg panel panel-lift border-b rv" style="transition-delay:.40s">
+      <div class="wg-head"><div class="wg-title">Studio Time</div><div class="wg-ic bb" style="background:rgba(0,180,255,0.12);color:var(--neon-b)">◎</div></div>
+      <div class="wg-clock">
+        <div class="wg-time mono" id="wgClock">--:--:--</div>
+        <div class="wg-date" id="wgDate">Loading...</div>
+      </div>
+      <div class="wg-zones">
+        <div class="wz"><div class="wz-city">NYC</div><div class="wz-time mono" id="tNY">--:--</div></div>
+        <div class="wz"><div class="wz-city">LON</div><div class="wz-time mono" id="tLN">--:--</div></div>
+        <div class="wz"><div class="wz-city">TKY</div><div class="wz-time mono" id="tTK">--:--</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     ██ 05 — STYLE / NEON GLASS
+════════════════════════════════════════ -->
+<section class="sec style-sec">
+  <div class="rv">
+    <p class="sec-tag tb">05 — Design System</p>
+    <h2 class="sec-h">Neon + <span class="neon-b">Glass</span></h2>
+    <p class="sec-sub">The visual language of HXZE. Every surface has depth. Every element breathes with light.</p>
+  </div>
+
+  <div class="style-grid">
+    <!-- Neon borders -->
+    <div class="style-card panel panel-lift rv">
+      <div class="an-head"><div class="an-title">Neon Border System</div><div class="tag-pill tg-b">Interactive</div></div>
+      <div class="neon-borders">
+        <div class="nb-chip nb-g">⬡ Graphic Design — Neon Green</div>
+        <div class="nb-chip nb-b">◈ Web Design — Neon Blue</div>
+        <div class="nb-chip nb-p">✦ Clothing Design — Neon Purple</div>
+        <div class="nb-chip nb-o">≋ Network Design — Neon Orange</div>
+      </div>
+    </div>
+
+    <!-- Typography -->
+    <div class="style-card panel panel-lift rv" style="transition-delay:.1s">
+      <div class="an-head"><div class="an-title">Type System</div><div class="tag-pill tg-g">Exo 2 + JetBrains</div></div>
+      <div class="typo-demo">
+        <div class="td-row">
+          <div class="td-head">HXZE</div>
+          <div class="td-sub mono">EXO 2 BLACK — DISPLAY / HERO</div>
+        </div>
+        <div class="td-row">
+          <div style="font-family:var(--sans);font-weight:200;font-size:1.1rem;color:var(--text-m);letter-spacing:.06em">Design Intelligence</div>
+          <div class="td-sub mono">EXO 2 EXTRALIGHT — BODY</div>
+        </div>
+        <div class="td-row">
+          <div style="font-family:var(--mono);font-size:.82rem;color:var(--neon-b);letter-spacing:.2em">SYS_ID: HXZ-2026</div>
+          <div class="td-sub mono">JETBRAINS MONO — SYSTEM</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Glass layers -->
+    <div class="style-card panel panel-lift rv" style="transition-delay:.2s">
+      <div class="an-head"><div class="an-title">Glass Depth Layers</div><div class="tag-pill tg-p">3 Levels</div></div>
+      <div class="glass-layers">
+        <div class="gl gl1">Layer 01 — 30% blur</div>
+        <div class="gl gl2">Layer 02 — 55% blur</div>
+        <div class="gl gl3">Layer 03 — 80% blur</div>
+      </div>
+      <!-- Palette -->
+      <div class="palette-row" style="margin-top:16px">
+        <div class="pal-chip" style="width:40px;height:40px;background:var(--neon-g);box-shadow:0 0 20px rgba(0,255,136,0.4)"></div>
+        <div class="pal-chip" style="width:40px;height:40px;background:var(--neon-b);box-shadow:0 0 20px rgba(0,180,255,0.4)"></div>
+        <div class="pal-chip" style="width:40px;height:40px;background:var(--neon-p);box-shadow:0 0 20px rgba(191,0,255,0.4)"></div>
+        <div class="pal-chip" style="width:40px;height:40px;background:var(--neon-o);box-shadow:0 0 20px rgba(255,106,0,0.4)"></div>
+        <div class="pal-chip" style="width:40px;height:40px;background:var(--layer2);border:1px solid var(--edge2)"></div>
+        <div class="pal-chip" style="width:40px;height:40px;background:var(--void);border:1px solid var(--edge)"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     ██ INTERACTIVE VIRTUAL SHOWROOM
+════════════════════════════════════════ -->
+<section class="sec" id="showroom" style="background:rgba(191,0,255,0.08);position:relative;overflow:hidden;">
+  <div class="rv">
+    <p class="sec-tag">02A — Clothing</p>
+    <h2 class="sec-h">Digital <span class="neon-p">Showroom</span></h2>
+    <p class="sec-sub">Explore our apparel collections in an interactive 3D environment. Use arrow keys or swipe to rotate and inspect each design.</p>
+  </div>
+  
+  <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:40px;align-items:center;margin-top:60px;">
+    <!-- 3D Carousel Section -->
+    <div class="panel panel-lift rv" style="aspect-ratio:1;overflow:hidden;border-radius:var(--r-lg);background:linear-gradient(135deg,rgba(191,0,255,0.15) 0%,rgba(191,0,255,0.05) 100%);position:relative;display:flex;align-items:center;justify-content:center;">
+      <canvas id="showroomCanvas" style="width:100%;height:100%;display:block;"></canvas>
+      <div style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(191,0,255,0.2);border:1px solid var(--neon-p);border-radius:var(--r-pill);padding:10px 20px;font-family:var(--mono);font-size:0.75rem;letter-spacing:.08em;color:var(--neon-p);text-transform:uppercase;">↔ Rotate • ↑↓ Zoom</div>
+    </div>
+    
+    <!-- Details Panel -->
+    <div class="rv-r">
+      <div class="panel panel-lift" style="background:rgba(191,0,255,0.06);border:1px solid rgba(191,0,255,0.3);margin-bottom:20px;">
+        <div style="margin-bottom:20px;">
+          <div style="font-family:var(--mono);font-size:0.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-m);margin-bottom:8px;">Current Piece</div>
+          <h3 style="font-size:1.6rem;font-weight:900;color:var(--neon-p);margin-bottom:8px;" id="showroom-title">VLTGE DROP 03</h3>
+          <p style="color:var(--text-m);font-size:0.9rem;" id="showroom-desc">Premium oversized hoodie with reinforced seams and heritage branding.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-top:20px;border-top:1px solid rgba(191,0,255,0.2);">
+          <div>
+            <div style="font-family:var(--mono);font-size:0.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-d);">Material</div>
+            <div style="color:var(--text);font-weight:700;margin-top:4px;" id="showroom-material">Cotton Blend</div>
+          </div>
+          <div>
+            <div style="font-family:var(--mono);font-size:0.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-d);">Available</div>
+            <div style="color:var(--neon-p);font-weight:700;margin-top:4px;" id="showroom-stock">In Stock</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <button onclick="changeGarment(-1)" style="border-color:var(--neon-p);color:var(--neon-p);padding:12px;border-radius:var(--r-sm);border:1.5px solid;font-weight:700;cursor:pointer;transition:.3s;background:transparent;font-family:var(--sans);">← Previous</button>
+        <button onclick="changeGarment(1)" style="border-color:var(--neon-p);color:var(--neon-p);padding:12px;border-radius:var(--r-sm);border:1.5px solid;font-weight:700;cursor:pointer;transition:.3s;background:transparent;font-family:var(--sans);">Next →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     ██ SYSTEM LOGS / ARCHIVE
+════════════════════════════════════════ -->
+<section class="sec" id="logs" style="background:rgba(0,255,136,0.04);">
+  <div class="rv">
+    <p class="sec-tag">System Access • Restricted</p>
+    <h2 class="sec-h">Project <span class="neon-g">Archive</span></h2>
+    <p class="sec-sub">Declassified system logs revealing the hidden intelligence behind HXZE's most ambitious projects.</p>
+  </div>
+  
+  <div class="panel panel-lift rv" style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.3);margin-top:40px;font-family:var(--mono);font-size:0.85rem;padding:30px;border-radius:var(--r-lg);overflow:hidden;">
+    <div style="color:var(--neon-g);margin-bottom:20px;min-height:200px;line-height:1.8;position:relative;">
+      <div id="terminal-output">
+        <div>▌ HXZE_SYSTEM_v2.4.1 // INITIALIZED</div>
+        <div style="margin-top:10px;">&gt; ACCESS GRANTED • SECURITY_LEVEL: CLASSIFIED</div>
+        <div style="margin-top:10px;">&gt; Scanning archive databases...</div>
+      </div>
+      <div id="cursor-blink" style="display:inline-block;width:8px;height:16px;background:var(--neon-g);margin-left:4px;animation:blink .7s infinite;"></div>
+    </div>
+    <div style="border-top:1px solid rgba(0,255,136,0.2);padding-top:20px;margin-top:20px;">
+      <button onclick="typeLogs()" style="background:var(--neon-g);color:var(--void);padding:10px 20px;border:none;border-radius:var(--r-sm);font-family:var(--mono);font-weight:700;cursor:pointer;transition:.3s;">▶ DECODE LOGS</button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     ██ CREATIVE STUDIO HUB
+════════════════════════════════════════ -->
+<section class="sec" id="studio-hub" style="background:rgba(0,180,255,0.04);position:relative;overflow:hidden;">
+  <div class="rv">
+    <p class="sec-tag">Workspace</p>
+    <h2 class="sec-h">Studio <span class="neon-b">Dashboard</span></h2>
+    <p class="sec-sub">Live network of creative modules. Click any node to explore project intelligence.</p>
+  </div>
+  
+  <div style="margin-top:60px;position:relative;width:100%;height:500px;border-radius:var(--r-lg);overflow:hidden;background:radial-gradient(ellipse 80% 80% at 50% 50%,rgba(0,180,255,0.08) 0%,transparent 70%);border:1px solid var(--edge2);">
+    <canvas id="networkCanvas" style="width:100%;height:100%;display:block;"></canvas>
+    <div id="nodeTooltip" style="position:absolute;background:rgba(12,18,36,0.95);border:1px solid var(--neon-b);border-radius:var(--r-sm);padding:15px;font-family:var(--mono);font-size:0.8rem;color:var(--neon-b);pointer-events:none;display:none;z-index:100;max-width:200px;box-shadow:0 0 30px rgba(0,180,255,0.3);">
+      <div id="tooltipTitle" style="font-weight:700;margin-bottom:6px;"></div>
+      <div id="tooltipDesc" style="color:var(--text-m);font-size:0.75rem;line-height:1.6;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     ██ INTERACTIVE COMPONENT LIBRARY
+════════════════════════════════════════ -->
+<section class="sec" id="labs" style="background:rgba(255,106,0,0.04);">
+  <div class="rv">
+    <p class="sec-tag">Customization</p>
+    <h2 class="sec-h">Design <span class="neon-o">Labs</span></h2>
+    <p class="sec-sub">Play with HXZE's design system in real-time. Adjust colors, effects, and UI parameters.</p>
+  </div>
+  
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;margin-top:50px;">
+    <!-- Color Picker -->
+    <div class="panel panel-lift rv" style="border-color:var(--neon-o);border:1px solid rgba(255,106,0,0.4);">
+      <div style="margin-bottom:20px;">
+        <div style="font-family:var(--mono);font-size:0.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--neon-o);margin-bottom:15px;font-weight:700;">Primary Neon</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+          <button onclick="setNeonColor('#00b4ff')" style="width:100%;aspect-ratio:1;background:var(--neon-b);border:none;border-radius:var(--r-sm);cursor:pointer;transition:.2s;opacity:0.7;" title="Blue"></button>
+          <button onclick="setNeonColor('#00ff88')" style="width:100%;aspect-ratio:1;background:var(--neon-g);border:none;border-radius:var(--r-sm);cursor:pointer;transition:.2s;opacity:0.7;" title="Green"></button>
+          <button onclick="setNeonColor('#bf00ff')" style="width:100%;aspect-ratio:1;background:var(--neon-p);border:none;border-radius:var(--r-sm);cursor:pointer;transition:.2s;opacity:0.7;" title="Purple"></button>
+          <button onclick="setNeonColor('#ff6a00')" style="width:100%;aspect-ratio:1;background:var(--neon-o);border:none;border-radius:var(--r-sm);cursor:pointer;transition:.2s;opacity:0.7;" title="Orange"></button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Scanline Control -->
+    <div class="panel panel-lift rv" style="border-color:var(--neon-o);border:1px solid rgba(255,106,0,0.4);">
+      <div style="margin-bottom:20px;">
+        <div style="font-family:var(--mono);font-size:0.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--neon-o);margin-bottom:15px;font-weight:700;">Scanline Effect</div>
+        <input type="range" id="scanlineSlider" min="0" max="100" value="100" onchange="adjustScanline(this.value)" style="width:100%;cursor:pointer;">
+        <div style="color:var(--text-d);font-size:0.75rem;margin-top:10px;">Intensity: <span id="scanlineValue">100</span>%</div>
+      </div>
+    </div>
+    
+    <!-- Grain Control -->
+    <div class="panel panel-lift rv" style="border-color:var(--neon-o);border:1px solid rgba(255,106,0,0.4);">
+      <div style="margin-bottom:20px;">
+        <div style="font-family:var(--mono);font-size:0.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--neon-o);margin-bottom:15px;font-weight:700;">Grain Texture</div>
+        <input type="range" id="grainSlider" min="0" max="100" value="100" onchange="adjustGrain(this.value)" style="width:100%;cursor:pointer;">
+        <div style="color:var(--text-d);font-size:0.75rem;margin-top:10px;">Opacity: <span id="grainValue">100</span>%</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     ██ AMBIENT SOUNDSCAPE
+════════════════════════════════════════ -->
+<section class="sec" id="soundscape" style="background:rgba(191,0,255,0.04);">
+  <div class="rv">
+    <p class="sec-tag">Audio Environment</p>
+    <h2 class="sec-h">Ambient <span class="neon-p">Soundscape</span></h2>
+    <p class="sec-sub">Immerse yourself in the sonic aesthetic of HXZE. Enable low-frequency ambient with glitch effects.</p>
+  </div>
+  
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:50px;">
+    <!-- Ambient Sound -->
+    <div class="panel panel-lift rv" style="border-color:var(--neon-p);border:1px solid rgba(191,0,255,0.3);display:flex;flex-direction:column;justify-content:space-between;">
+      <div>
+        <div style="font-family:var(--mono);font-size:0.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--neon-p);margin-bottom:12px;font-weight:700;">◉ Deep Ambient</div>
+        <p style="color:var(--text-m);font-size:0.85rem;line-height:1.6;margin-bottom:20px;">Low-frequency dark ambient loop with subtle reverb and spatial processing. Perfect for focused creative work.</p>
+      </div>
+      <button id="ambientBtn" onclick="toggleSound('ambient')" style="background:rgba(191,0,255,0.2);border:1px solid var(--neon-p);color:var(--neon-p);padding:12px;border-radius:var(--r-sm);font-family:var(--mono);font-weight:700;cursor:pointer;transition:.3s;">▶ PLAY</button>
+    </div>
+    
+    <!-- Glitch Effects -->
+    <div class="panel panel-lift rv" style="border-color:var(--neon-p);border:1px solid rgba(191,0,255,0.3);display:flex;flex-direction:column;justify-content:space-between;">
+      <div>
+        <div style="font-family:var(--mono);font-size:0.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--neon-p);margin-bottom:12px;font-weight:700;">⚡ Glitch Events</div>
+        <p style="color:var(--text-m);font-size:0.85rem;line-height:1.6;margin-bottom:20px;">Randomized digital glitch sounds triggered on panel interactions. Adds texture and energy to navigation.</p>
+      </div>
+      <button id="glitchBtn" onclick="toggleSound('glitch')" style="background:rgba(191,0,255,0.2);border:1px solid var(--neon-p);color:var(--neon-p);padding:12px;border-radius:var(--r-sm);font-family:var(--mono);font-weight:700;cursor:pointer;transition:.3s;">▶ ENABLE</button>
+    </div>
+    
+    <!-- Master Volume -->
+    <div class="panel panel-lift rv" style="border-color:var(--neon-p);border:1px solid rgba(191,0,255,0.3);display:flex;flex-direction:column;justify-content:space-between;">
+      <div>
+        <div style="font-family:var(--mono);font-size:0.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--neon-p);margin-bottom:12px;font-weight:700;">🔊 Master Volume</div>
+        <input type="range" id="volumeSlider" min="0" max="100" value="30" onchange="setMasterVolume(this.value)" style="width:100%;cursor:pointer;margin-bottom:15px;">
+        <div style="color:var(--text-d);font-size:0.75rem;">Volume: <span id="volumeValue">30</span>%</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     ██ CREW DIRECTORY
+════════════════════════════════════════ -->
+<section class="sec" id="crew" style="background:rgba(0,255,136,0.04);">
+  <div class="rv">
+    <p class="sec-tag">Team</p>
+    <h2 class="sec-h">Creative <span class="neon-g">Crew</span></h2>
+    <p class="sec-sub">The minds and hands behind HXZE's interdisciplinary approach. Scroll to explore the studio collective.</p>
+  </div>
+  
+  <div style="margin-top:50px;overflow-x:auto;padding:20px 0;scrollbar-width:thin;scrollbar-color:var(--neon-g) transparent;">
+    <div style="display:flex;gap:20px;min-width:min-content;padding:0 20px;">
+      <!-- Ted.Ke -->
+      <div class="panel panel-lift rv" style="flex:0 0 320px;border-color:var(--neon-g);border:1px solid rgba(0,255,136,0.4);position:relative;overflow:hidden;">
+        <div style="aspect-ratio:1;background:linear-gradient(135deg,rgba(0,255,136,0.15) 0%,rgba(0,255,136,0.05) 100%);display:flex;align-items:center;justify-content:center;font-size:4rem;margin-bottom:20px;border-radius:var(--r-md);">🎨</div>
+        <div style="font-family:var(--mono);font-size:0.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--neon-g);margin-bottom:8px;font-weight:700;">Creative Director</div>
+        <h3 style="font-size:1.4rem;font-weight:900;color:var(--text);margin-bottom:4px;">Ted.Ke</h3>
+        <p style="color:var(--text-m);font-size:0.85rem;line-height:1.6;margin-bottom:20px;">Visual strategist. Brand architect. Graphic design evangelist with deep expertise in identity systems and print direction.</p>
+        <div style="padding-top:15px;border-top:1px solid rgba(0,255,136,0.2);font-family:var(--mono);font-size:0.7rem;color:var(--neon-g);">◉ ACTIVE</div>
+      </div>
+      
+      <!-- Design Engineer -->
+      <div class="panel panel-lift rv" style="flex:0 0 320px;border-color:var(--neon-b);border:1px solid rgba(0,180,255,0.4);position:relative;overflow:hidden;">
+        <div style="aspect-ratio:1;background:linear-gradient(135deg,rgba(0,180,255,0.15) 0%,rgba(0,180,255,0.05) 100%);display:flex;align-items:center;justify-content:center;font-size:4rem;margin-bottom:20px;border-radius:var(--r-md);">💻</div>
+        <div style="font-family:var(--mono);font-size:0.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--neon-b);margin-bottom:8px;font-weight:700;">Design Engineer</div>
+        <h3 style="font-size:1.4rem;font-weight:900;color:var(--text);margin-bottom:4px;">ArkTech</h3>
+        <p style="color:var(--text-m);font-size:0.85rem;line-height:1.6;margin-bottom:20px;">AI-powered system architect. Bridges creative vision with intelligent automation and technical infrastructure.</p>
+        <div style="padding-top:15px;border-top:1px solid rgba(0,180,255,0.2);font-family:var(--mono);font-size:0.7rem;color:var(--neon-b);">◉ ONLINE</div>
+      </div>
+      
+      <!-- Apparel Specialist -->
+      <div class="panel panel-lift rv" style="flex:0 0 320px;border-color:var(--neon-p);border:1px solid rgba(191,0,255,0.4);position:relative;overflow:hidden;">
+        <div style="aspect-ratio:1;background:linear-gradient(135deg,rgba(191,0,255,0.15) 0%,rgba(191,0,255,0.05) 100%);display:flex;align-items:center;justify-content:center;font-size:4rem;margin-bottom:20px;border-radius:var(--r-md);">👕</div>
+        <div style="font-family:var(--mono);font-size:0.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--neon-p);margin-bottom:8px;font-weight:700;">Apparel Specialist</div>
+        <h3 style="font-size:1.4rem;font-weight:900;color:var(--text);margin-bottom:4px;">VLTGE Collective</h3>
+        <p style="color:var(--text-m);font-size:0.85rem;line-height:1.6;margin-bottom:20px;">Textile innovators. Garment technologists. Specializing in sustainable apparel drops and avant-garde fashion design.</p>
+        <div style="padding-top:15px;border-top:1px solid rgba(191,0,255,0.2);font-family:var(--mono);font-size:0.7rem;color:var(--neon-p);">◉ ACTIVE</div>
+      </div>
+      
+      <!-- Network Architect -->
+      <div class="panel panel-lift rv" style="flex:0 0 320px;border-color:var(--neon-o);border:1px solid rgba(255,106,0,0.4);position:relative;overflow:hidden;">
+        <div style="aspect-ratio:1;background:linear-gradient(135deg,rgba(255,106,0,0.15) 0%,rgba(255,106,0,0.05) 100%);display:flex;align-items:center;justify-content:center;font-size:4rem;margin-bottom:20px;border-radius:var(--r-md);">🌐</div>
+        <div style="font-family:var(--mono);font-size:0.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--neon-o);margin-bottom:8px;font-weight:700;">Network Architect</div>
+        <h3 style="font-size:1.4rem;font-weight:900;color:var(--text);margin-bottom:4px;">NET Labs</h3>
+        <p style="color:var(--text-m);font-size:0.85rem;line-height:1.6;margin-bottom:20px;">Infrastructure designers. Enterprise topology specialists. Building resilient, scalable digital ecosystems.</p>
+        <div style="padding-top:15px;border-top:1px solid rgba(255,106,0,0.2);font-family:var(--mono);font-size:0.7rem;color:var(--neon-o);">◉ STANDBY</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     ██ CTA
+════════════════════════════════════════ -->
+<section class="cta-sec rv" id="contact" style="position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;z-index:0;pointer-events:none;">
+    <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=1400&q=80" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;opacity:0.06;filter:saturate(1.5);">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(0,180,255,0.08) 0%,transparent 70%);"></div>
+  </div>
+  <div class="cta-glow-ring"></div>
+  <div class="cta-box panel" style="position:relative;z-index:1;">
+    <h2 class="cta-h">Ready to Build<br><span class="neon-b">Something Different?</span></h2>
+    <p class="cta-sub">Whether it's a website, a clothing drop, a brand identity, or a network architecture — HXZE delivers. Let's start.</p>
+    <div class="input-row">
+      <input type="email" class="nl-in" placeholder="your@email.com">
+      <button class="nl-btn">Get In Touch</button>
+    </div>
+    <div class="cta-btns">
+      <a href="#" class="btn-neon btn-neon-b">View Portfolio</a>
+      <a href="#" class="btn-neon btn-neon-g">Book a Call ↗</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div style="position:relative;z-index:10;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--neon-p),var(--neon-b),var(--neon-g),transparent);opacity:.5;"></div>
+<footer>
+  <div class="foot-top">
+    <div class="foot-logo-wrap">
+      <a href="#" class="foot-logo"><div class="logo-icon" style="width:24px;height:24px;font-size:.6rem">HX</div>HXZE</a>
+      <p class="foot-tag">Design intelligence across every dimension. <strong>Founded & Designed by Ted.Ke</strong> • Powered by <strong>ArkTech</strong>. Websites. Graphics. Clothing. Networks. One studio.</p>
+      <div class="foot-socials">
+        <a href="#" class="foot-soc">IG</a>
+        <a href="#" class="foot-soc">𝕏</a>
+        <a href="#" class="foot-soc">BH</a>
+        <a href="#" class="foot-soc">TK</a>
+      </div>
+    </div>
+    <div>
+      <p class="foot-col-h">Services</p>
+      <ul class="foot-links">
+        <li><a href="#">Graphic Design</a></li>
+        <li><a href="#">Web Design</a></li>
+        <li><a href="#">Clothing Design</a></li>
+        <li><a href="#">Network Design</a></li>
+        <li><a href="#">Brand Strategy</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="foot-col-h">Studio</p>
+      <ul class="foot-links">
+        <li><a href="#">About HXZE</a></li>
+        <li><a href="#">Work</a></li>
+        <li><a href="#">Process</a></li>
+        <li><a href="#">Journal</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="foot-col-h">Connect</p>
+      <ul class="foot-links">
+        <li><a href="#">Start a Project</a></li>
+        <li><a href="#">Pricing</a></li>
+        <li><a href="#">Book a Call</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot-bot">
+    <span class="foot-copy mono">© 2026 HXZE Studio • Creative Director: Ted.Ke • Powered by ArkTech. All rights reserved.</span>
+    <div class="foot-legal">
+      <a href="#">Privacy</a><a href="#">Terms</a><a href="#">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════ JS ═══════════════════════════ -->
+<script>
+/* ── CURSOR ── */
+const C=document.getElementById('C'), CR=document.getElementById('CR');
+document.addEventListener('mousemove',e=>{
+  C.style.left=e.clientX+'px'; C.style.top=e.clientY+'px';
+  CR.style.left=e.clientX+'px'; CR.style.top=e.clientY+'px';
+});
+document.querySelectorAll('a,button,[onclick],.panel-lift,.wg,.svc-card,.work-card,.kpi,.an-card,.style-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ C.classList.add('x'); CR.classList.add('x'); });
+  el.addEventListener('mouseleave',()=>{ C.classList.remove('x'); CR.classList.remove('x'); });
+});
+
+/* ── NAV ── */
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('on',window.scrollY>40));
+
+/* ── HAMBURGER ── */
+const hbg=document.getElementById('hbg'), mob=document.getElementById('mobNav');
+hbg.addEventListener('click',()=>{ hbg.classList.toggle('o'); mob.classList.toggle('o'); mob.style.display=mob.classList.contains('o')?'flex':'none'; });
+mob.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{ hbg.classList.remove('o'); mob.classList.remove('o'); mob.style.display='none'; }));
+
+/* ── SCROLL REVEAL ── */
+const rvEls=document.querySelectorAll('.rv,.rv-l,.rv-r');
+const rvIO=new IntersectionObserver(entries=>entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); }),{threshold:.06});
+rvEls.forEach(el=>rvIO.observe(el));
+setTimeout(()=>rvEls.forEach(el=>{ if(el.getBoundingClientRect().top<window.innerHeight) el.classList.add('in'); }),80);
+
+/* ── CLOCK ── */
+const pad=n=>String(n).padStart(2,'0');
+function updateClock(){
+  const n=new Date();
+  const wgC=document.getElementById('wgClock');
+  const wgD=document.getElementById('wgDate');
+  if(wgC) wgC.textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
+  if(wgD) wgD.textContent=n.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+  const tz=z=>{ try{ return new Date().toLocaleTimeString('en-US',{timeZone:z,hour:'2-digit',minute:'2-digit',hour12:false}); }catch(e){ return '--:--'; } };
+  const ny=document.getElementById('tNY'), ln=document.getElementById('tLN'), tk=document.getElementById('tTK');
+  if(ny) ny.textContent=tz('America/New_York');
+  if(ln) ln.textContent=tz('Europe/London');
+  if(tk) tk.textContent=tz('Asia/Tokyo');
+}
+setInterval(updateClock,1000); updateClock();
+
+/* ── SCORE COUNTER ── */
+const scoreEl=document.getElementById('scoreCount');
+if(scoreEl){
+  const sIO=new IntersectionObserver(entries=>{
+    if(entries[0].isIntersecting){
+      let v=0; const step=()=>{ v=Math.min(v+2,96); scoreEl.textContent=v; if(v<96) requestAnimationFrame(step); };
+      step(); sIO.disconnect();
+    }
+  },{threshold:.3});
+  sIO.observe(scoreEl.closest('.wg'));
+}
+
+/* ── NETWORK CANVAS ── */
+const canvas=document.getElementById('networkCanvas');
+if(canvas){
+  const ctx=canvas.getContext('2d');
+  const nodes=[];
+  function resize(){
+    canvas.width=canvas.offsetWidth;
+    canvas.height=canvas.offsetHeight;
+  }
+  resize();
+  // Create nodes
+  for(let i=0;i<18;i++){
+    nodes.push({
+      x:Math.random()*canvas.width,
+      y:Math.random()*canvas.height,
+      vx:(Math.random()-.5)*.4,
+      vy:(Math.random()-.5)*.4,
+      r:Math.random()*2+1.5,
+      color:['#00b4ff','#00ff88','#bf00ff','#ff6a00'][Math.floor(Math.random()*4)]
+    });
+  }
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    // Draw connections
+    nodes.forEach((a,i)=>nodes.slice(i+1).forEach(b=>{
+      const d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d<90){
+        ctx.beginPath();
+        ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle=`rgba(0,180,255,${(1-d/90)*.15})`;
+        ctx.lineWidth=.5;
+        ctx.stroke();
+      }
+    }));
+    // Draw nodes
+    nodes.forEach(n=>{
+      ctx.beginPath();
+      ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+      ctx.fillStyle=n.color;
+      ctx.shadowColor=n.color;
+      ctx.shadowBlur=8;
+      ctx.fill();
+      ctx.shadowBlur=0;
+      // Update
+      n.x+=n.vx; n.y+=n.vy;
+      if(n.x<0||n.x>canvas.width) n.vx*=-1;
+      if(n.y<0||n.y>canvas.height) n.vy*=-1;
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+  window.addEventListener('resize',resize);
+}
+
+/* ── CHART TABS ── */
+document.querySelectorAll('.chart-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.chart-tab').forEach(t=>t.classList.remove('a'));
+    tab.classList.add('a');
+  });
+});
+
+/* ── PORTFOLIO TABS & COLLAPSE ── */
+const portfolioItems = Array.from(document.querySelectorAll('.portfolio-item'));
+const portfolioToggleBtn = document.getElementById('portfolio-toggle-btn');
+let portfolioExpanded = false;
+const PORTFOLIO_VISIBLE_COUNT = 6;
+
+function updatePortfolioList(){
+  const activeTab = document.querySelector('.portfolio-tab-btn.active');
+  const filter = activeTab ? activeTab.dataset.filter : 'all';
+  let visibleCount = 0;
+  let hiddenCount = 0;
+  let matchCount = 0;
+
+  portfolioItems.forEach(item=>{
+    const matches = filter==='all' || item.dataset.category===filter;
+    if(!matches){
+      item.style.opacity='0';
+      setTimeout(()=>item.style.display='none',300);
+      return;
+    }
+
+    matchCount++;
+    if(portfolioExpanded || visibleCount < PORTFOLIO_VISIBLE_COUNT){
+      item.style.display='block';
+      setTimeout(()=>item.style.opacity='1',10);
+    } else {
+      item.style.opacity='0';
+      setTimeout(()=>item.style.display='none',300);
+      hiddenCount++;
+    }
+    visibleCount++;
+  });
+
+  if(portfolioToggleBtn){
+    if(portfolioExpanded || matchCount > PORTFOLIO_VISIBLE_COUNT){
+      portfolioToggleBtn.style.display='inline-flex';
+      portfolioToggleBtn.textContent = portfolioExpanded ? 'Show less work' : 'Show more work';
+    } else {
+      portfolioToggleBtn.style.display='none';
+    }
+  }
+}
+
+document.querySelectorAll('.portfolio-tab-btn').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    portfolioExpanded = false;
+    document.querySelectorAll('.portfolio-tab-btn').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    updatePortfolioList();
+  });
+});
+
+if(portfolioToggleBtn){
+  portfolioToggleBtn.addEventListener('click',()=>{
+    portfolioExpanded = !portfolioExpanded;
+    updatePortfolioList();
+  });
+}
+
+const posterStrip = document.getElementById('posterStrip');
+if(posterStrip){
+  document.querySelectorAll('.poster-scroll-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const direction = Number(btn.dataset.direction) || 1;
+      const card = posterStrip.querySelector('.poster-strip-item');
+      const step = card ? card.clientWidth + 12 : posterStrip.clientWidth * 0.8;
+      posterStrip.scrollBy({ left: step * direction, behavior: 'smooth' });
+    });
+  });
+}
+
+updatePortfolioList();
+
+/* ── DEPTH LAYER PARALLAX ── */
+window.addEventListener('scroll',()=>{
+  const s=window.scrollY*0.02;
+  const dl=document.querySelectorAll('.depth-layer');
+  dl.forEach((el,i)=>{ el.style.transform=`translateY(${s*(i*.5)}px)`; });
+});
+
+/* ── HERO PANEL HOVER tilt ── */
+const heroRight=document.querySelector('.hero-right');
+if(heroRight){
+  heroRight.addEventListener('mousemove',e=>{
+    const r=heroRight.getBoundingClientRect();
+    const xPct=(e.clientX-r.left)/r.width-.5;
+    const yPct=(e.clientY-r.top)/r.height-.5;
+    heroRight.style.transform=`perspective(1000px) rotateY(${xPct*4}deg) rotateX(${-yPct*3}deg)`;
+  });
+}
+
+/* ════════════════════════════════════════
+   NEW FEATURES: VIRTUAL SHOWROOM, LOGS, STUDIO HUB, LABS, SOUNDSCAPE, CREW
+════════════════════════════════════════ */
+
+// VIRTUAL SHOWROOM - 3D Carousel
+const garments = [
+  {title: 'VLTGE DROP 03', desc: 'Premium oversized hoodie with reinforced seams and heritage branding.', material: 'Cotton Blend', stock: 'In Stock'},
+  {title: 'VOID SERIES #1', desc: 'Minimalist tee with experimental geometric print. Limited edition run.', material: '100% Organic Cotton', stock: 'Low Stock'},
+  {title: 'NOCTURNE JACKET', desc: 'Technical outerwear with embedded smart fabric sensors and modular pockets.', material: 'Synthetic Blend', stock: 'In Stock'},
+  {title: 'NEON CAPSULE', desc: 'Reflective cargo pants with UV-reactive threading and performance fibers.', material: 'Technical Poly', stock: 'Pre-Order'},
+];
+let currentGarment = 0;
+
+function changeGarment(dir){
+  currentGarment = (currentGarment + dir + garments.length) % garments.length;
+  const g = garments[currentGarment];
+  document.getElementById('showroom-title').textContent = g.title;
+  document.getElementById('showroom-desc').textContent = g.desc;
+  document.getElementById('showroom-material').textContent = g.material;
+  document.getElementById('showroom-stock').textContent = g.stock;
+}
+
+// Showroom Canvas - Rotating 3D illusion
+const showroomCanvas = document.getElementById('showroomCanvas');
+if(showroomCanvas){
+  const ctx = showroomCanvas.getContext('2d');
+  let rotation = 0;
+  function drawShowroom(){
+    const w = showroomCanvas.offsetWidth, h = showroomCanvas.offsetHeight;
+    showroomCanvas.width = w; showroomCanvas.height = h;
+    
+    ctx.fillStyle = 'rgba(191,0,255,0.05)';
+    ctx.fillRect(0, 0, w, h);
+    
+    const centerX = w/2, centerY = h/2, radius = 80;
+    for(let i=0; i<8; i++){
+      const angle = (rotation + (i * Math.PI/4));
+      const x = centerX + Math.cos(angle) * radius;
+      const y = centerY + Math.sin(angle) * radius;
+      const opacity = (Math.sin(angle) + 1) / 2;
+      
+      ctx.fillStyle = `rgba(191,0,255,${opacity * 0.6})`;
+      ctx.beginPath();
+      ctx.arc(x, y, 12 + opacity * 8, 0, Math.PI*2);
+      ctx.fill();
+    }
+    
+    ctx.strokeStyle = `rgba(191,0,255,0.3)`;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(centerX, centerY, radius * 1.2, radius * 0.6, rotation, 0, Math.PI*2);
+    ctx.stroke();
+    
+    rotation += 0.02;
+    requestAnimationFrame(drawShowroom);
+  }
+  drawShowroom();
+}
+
+// SYSTEM LOGS - Terminal typing effect
+const logMessages = [
+  '▌ PROJECT_NOCTURNE: Brand identity system complete',
+  '▌ GARMENT_VLTGE_03: Production run approved',
+  '▌ INFRASTRUCTURE_ARK: Network topology optimized',
+  '▌ WEB_MAISON: E-commerce platform live',
+  '▌ AI_INTEGRATION: Machine learning models deployed',
+  '▌ ANALYSIS: 98.7% project completion rate',
+];
+
+function typeLogs(){
+  const output = document.getElementById('terminal-output');
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = '⏳ PROCESSING...';
+  
+  let msgIndex = 0;
+  function typeMsg(){
+    if(msgIndex >= logMessages.length){
+      btn.disabled = false;
+      btn.textContent = '▶ DECODE LOGS';
+      return;
+    }
+    const msg = logMessages[msgIndex];
+    const div = document.createElement('div');
+    div.style.marginTop = '10px';
+    output.appendChild(div);
+    
+    let charIndex = 0;
+    function typeChar(){
+      if(charIndex < msg.length){
+        div.textContent += msg[charIndex];
+        charIndex++;
+        setTimeout(typeChar, 20);
+      } else {
+        msgIndex++;
+        setTimeout(typeMsg, 300);
+      }
+    }
+    typeChar();
+  }
+  typeMsg();
+}
+
+// STUDIO HUB - Network Visualization
+const networkCanvas = document.getElementById('networkCanvas');
+if(networkCanvas){
+  const ctx = networkCanvas.getContext('2d');
+  const nodes = [
+    {id: 'graphic', x: 0.2, y: 0.3, label: 'Graphic Design', desc: 'Brand identities, print, visual systems'},
+    {id: 'web', x: 0.8, y: 0.3, label: 'Web Design', desc: 'Responsive builds, e-commerce, UX'},
+    {id: 'clothing', x: 0.2, y: 0.7, label: 'Apparel', desc: 'Tech packs, collections, textiles'},
+    {id: 'network', x: 0.8, y: 0.7, label: 'Infrastructure', desc: 'Topology, security, enterprise'},
+    {id: 'center', x: 0.5, y: 0.5, label: 'HXZE Studio', desc: 'Creative intelligence hub'},
+  ];
+  
+  let mouseX = 0, mouseY = 0;
+  networkCanvas.addEventListener('mousemove', (e) => {
+    const rect = networkCanvas.getBoundingClientRect();
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top;
+  });
+  
+  function drawNetwork(){
+    const w = networkCanvas.offsetWidth, h = networkCanvas.offsetHeight;
+    networkCanvas.width = w; networkCanvas.height = h;
+    
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillRect(0, 0, w, h);
+    
+    // Draw connections
+    ctx.strokeStyle = 'rgba(0,180,255,0.2)';
+    ctx.lineWidth = 1;
+    nodes.forEach(n1 => {
+      if(n1.id !== 'center') return;
+      nodes.forEach(n2 => {
+        if(n2.id === 'center') return;
+        ctx.beginPath();
+        ctx.moveTo(n1.x * w, n1.y * h);
+        ctx.lineTo(n2.x * w, n2.y * h);
+        ctx.stroke();
+      });
+    });
+    
+    // Draw nodes
+    nodes.forEach(node => {
+      const nx = node.x * w, ny = node.y * h;
+      const dist = Math.hypot(mouseX - nx, mouseY - ny);
+      const isHovered = dist < 50;
+      
+      ctx.fillStyle = isHovered ? 'rgba(0,180,255,0.8)' : 'rgba(0,180,255,0.4)';
+      ctx.beginPath();
+      ctx.arc(nx, ny, isHovered ? 12 : 8, 0, Math.PI*2);
+      ctx.fill();
+      
+      if(isHovered){
+        document.getElementById('nodeTooltip').style.display = 'block';
+        document.getElementById('nodeTooltip').style.left = mouseX + 10 + 'px';
+        document.getElementById('nodeTooltip').style.top = mouseY + 10 + 'px';
+        document.getElementById('tooltipTitle').textContent = node.label;
+        document.getElementById('tooltipDesc').textContent = node.desc;
+      }
+    });
+    
+    const anyHovered = nodes.some(n => Math.hypot(mouseX - n.x * w, mouseY - n.y * h) < 50);
+    if(!anyHovered) document.getElementById('nodeTooltip').style.display = 'none';
+    
+    requestAnimationFrame(drawNetwork);
+  }
+  drawNetwork();
+}
+
+// DESIGN LABS - Interactive Controls
+function setNeonColor(color){
+  document.documentElement.style.setProperty('--neon-b', color);
+  const btns = document.querySelectorAll('.nl-btn, .btn-neon-b');
+  btns.forEach(btn => btn.style.borderColor = color);
+}
+
+function adjustScanline(val){
+  document.getElementById('scanlineValue').textContent = val;
+  document.querySelector('.scanline').style.opacity = (val / 100) * 0.008;
+}
+
+function adjustGrain(val){
+  document.getElementById('grainValue').textContent = val;
+  document.querySelector('.grain').style.opacity = (val / 100) * 0.022;
+}
+
+// SOUNDSCAPE - Audio Controls
+let audioContext = null;
+let ambientOsc = null;
+let glitchEnabled = false;
+
+function initAudio(){
+  if(audioContext) return;
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function toggleSound(type){
+  initAudio();
+  if(type === 'ambient'){
+    const btn = document.getElementById('ambientBtn');
+    if(btn.textContent === '▶ PLAY'){
+      playAmbient();
+      btn.textContent = '⏸ STOP';
+    } else {
+      stopAmbient();
+      btn.textContent = '▶ PLAY';
+    }
+  } else if(type === 'glitch'){
+    const btn = document.getElementById('glitchBtn');
+    glitchEnabled = !glitchEnabled;
+    btn.textContent = glitchEnabled ? '⏹ DISABLE' : '▶ ENABLE';
+  }
+}
+
+function playAmbient(){
+  if(!audioContext) return;
+  const now = audioContext.currentTime;
+  const osc = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  
+  osc.type = 'sine';
+  osc.frequency.value = 55;
+  gain.gain.setValueAtTime(0.05, now);
+  
+  osc.connect(gain);
+  gain.connect(audioContext.destination);
+  
+  osc.start(now);
+  ambientOsc = { osc, gain };
+  
+  setTimeout(() => stopAmbient(), 30000);
+}
+
+function stopAmbient(){
+  if(ambientOsc){
+    const now = audioContext.currentTime;
+    ambientOsc.gain.gain.setValueAtTime(0.05, now);
+    ambientOsc.gain.gain.linearRampToValueAtTime(0, now + 0.5);
+    ambientOsc.osc.stop(now + 0.5);
+    ambientOsc = null;
+  }
+}
+
+function triggerGlitch(){
+  if(!glitchEnabled || !audioContext) return;
+  const now = audioContext.currentTime;
+  const osc = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  
+  osc.type = 'square';
+  osc.frequency.value = Math.random() * 2000 + 200;
+  gain.gain.setValueAtTime(0.02, now);
+  gain.gain.linearRampToValueAtTime(0, now + 0.1);
+  
+  osc.connect(gain);
+  gain.connect(audioContext.destination);
+  
+  osc.start(now);
+  osc.stop(now + 0.1);
+}
+
+function setMasterVolume(val){
+  document.getElementById('volumeValue').textContent = val;
+  if(audioContext){
+    const dest = audioContext.destination;
+    if(dest.maxValue) dest.gain.value = val / 100;
+  }
+}
+
+// Trigger glitch on panel hovers
+document.querySelectorAll('.panel-lift').forEach(panel => {
+  panel.addEventListener('mouseenter', triggerGlitch);
+});
+
+// Animation keyframe for cursor blink
+const style = document.createElement('style');
+style.textContent = `@keyframes blink { 0%,49% { opacity:1; } 50%,100% { opacity:0; } }`;
+document.head.appendChild(style);
+
+
+</script>
+</body>
+</html>
